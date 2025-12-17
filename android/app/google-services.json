@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "83043915993",
+    "project_id": "mcea-b1ac2",
+    "storage_bucket": "mcea-b1ac2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:83043915993:android:1b46fa2e7c269c388406c8",
+        "android_client_info": {
+          "package_name": "com.mcea"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvCdzB1LS5WfiMIqRg1Kdq3eZm7f_aoL8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:83043915993:android:8f8afe0f37bee1398406c8",
+        "android_client_info": {
+          "package_name": "com.pixoralab.yrcea"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvCdzB1LS5WfiMIqRg1Kdq3eZm7f_aoL8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

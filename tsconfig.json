@@ -1,0 +1,111 @@
+{
+  "extends": "@react-native/typescript-config",
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "nativewind-env.d.ts"
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/Pods"
+  ],
+  "compilerOptions": {
+    "target": "esnext",
+    "types": [
+      "nativewind/types",
+      "jest"
+    ],
+    "module": "NodeNext",
+    "jsx": "react-native",
+    "esModuleInterop": true,
+    "strict": true,
+    "moduleResolution": "NodeNext",
+    "baseUrl": "./",
+    "paths": {
+      "utils": [
+        "src/utils"
+      ], // Alias for centralized imports from utils
+      "utils/*": [
+        "src/utils/*"
+      ], // Direct access to specific utils subfolders
+      "components": [
+        "src/components"
+      ], // Centralized import for all components
+      "components/*": [
+        "src/components/*"
+      ], // Specific imports for subfolders
+      "hooks": [
+        "src/hooks"
+      ], // Centralized imports from hooks
+      "hooks/*": [
+        "src/hooks/*"
+      ], // Specific imports for hook subfolders
+      "styles": [
+        "src/styles"
+      ], // Centralized styles import
+      "styles/*": [
+        "src/styles/*"
+      ], // Specific imports for subfolders in styles
+      "assets": [
+        "src/assets"
+      ], // Centralized imports for assets
+      "assets/*": [
+        "src/assets/*"
+      ], // Specific imports for subfolders in assets
+      "features": [
+        "src/features"
+      ], // Centralized imports for screens
+      "features/*": [
+        "src/features/*"
+      ], // Specific imports for screen subfolders
+      "navigation": [
+        "src/navigation"
+      ], // Centralized navigations import
+      "navigation/*": [
+        "src/navigation/*"
+      ], // Specific imports for subfolders in navigations
+      "types": [
+        "src/types"
+      ], // Centralized types import
+      "types/*": [
+        "src/types/*"
+      ], // Specific imports for subfolders in types
+      "services": [
+        "src/services"
+      ], // Centralized services import
+      "services/*": [
+        "src/services/*"
+      ], // Specific imports for subfolders in services
+      "constants": [
+        "src/constants"
+      ], // Centralized constants import
+      "constants/*": [
+        "src/constants/*"
+      ], // Specific imports for subfolders in constants
+      "translation": [
+        "src/translation"
+      ], // Centralized translations import
+      "translation/*": [
+        "src/translation/*"
+      ], // Specific imports for subfolders in translations
+      "store": [
+        "src/store"
+      ], // Centralized store imports
+      "store/*": [
+        "src/store/*"
+      ], // Specific imports for store subfolders
+      "api": [
+        "src/api"
+      ], // Centralized api imports
+      "api/*": [
+        "src/api/*"
+      ], // Specific imports for api subfolders
+      "database": [
+        "src/database"
+      ], // Centralized database imports
+      "database/*": [
+        "src/database/*"
+      ] // Specific imports for database subfolders
+    }
+  }
+}
