@@ -2,7 +2,7 @@ export type BookListsStackParamList = {
   BookListsScreen: { title: string };
   BookDetailScreen: { id: number | string };
   BookBuyScreen: { bookDetail: string };
-  BookReadScreen: { title: string };
+  BookReadScreen: { title: string, bookURL: string };
   BookPlayScreen: { bookDetail: {} | string };
 };
 

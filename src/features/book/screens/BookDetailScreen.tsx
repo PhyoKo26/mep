@@ -73,7 +73,7 @@ const BookDetailScreen = () => {
             <View className="flex-row justify-between my-6">
               <LinearButton
                 gradientClassName="h-12"
-                onPress={() => appNavigation.navigate('BookReadScreen', { title: BOOK.title })}
+                onPress={() => appNavigation.navigate('BookReadScreen', { title: BOOK.title, bookURL: BOOK.pdfURL })}
                 style={{ width: WIDTH / 2.3, alignSelf: 'center' }}
               // isLoading={isPending}
               // disabled={isPending}

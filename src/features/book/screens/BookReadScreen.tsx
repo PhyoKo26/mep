@@ -14,7 +14,7 @@ const PDF_URL = 'https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pld
 const BookReadScreen = () => {
     const { appNavigation } = useAppNavigate();
     const route = useRoute();
-    const { title } = route.params || {};
+    const { title, bookURL } = route.params || {};
 
     const pdfRef = useRef<any>(null);
 
@@ -28,6 +28,8 @@ const BookReadScreen = () => {
     }, []);
 
     const downloadPdf = async () => {
+        console.log(bookURL);
+        
         try {
             const { fs } = RNBlobUtil;
             const path = `${fs.dirs.CacheDir}/book.pdf`;
@@ -35,7 +37,7 @@ const BookReadScreen = () => {
             const res = await RNBlobUtil.config({
                 path,
                 fileCache: true,
-            }).fetch('GET', PDF_URL);
+            }).fetch('GET', bookURL);
 
             setLocalPath(`file://${res.path()}`);
         } catch (err) {
@@ -66,17 +68,28 @@ const BookReadScreen = () => {
     //     }
     // };
 
+    // const goPrev = () => {
+    //     if (page > 1) {
+    //         pdfRef.current?.setPage(page - 1);
+    //         setPage(p => p - 1);
+    //     }
+    // };
+
+    // const goNext = () => {
+    //     if (page < totalPages) {
+    //         pdfRef.current?.setPage(page + 1);
+    //         setPage(p => p + 1);
+    //     }
+    // };
     const goPrev = () => {
         if (page > 1) {
             pdfRef.current?.setPage(page - 1);
-            setPage(p => p - 1);
         }
     };
 
     const goNext = () => {
         if (page < totalPages) {
             pdfRef.current?.setPage(page + 1);
-            setPage(p => p + 1);
         }
     };
 
@@ -92,9 +105,9 @@ const BookReadScreen = () => {
                 ) : (
                     <Pdf
                         ref={pdfRef}
-                        source={{ uri: localPath }}
+                        source={{ uri: localPath, cache: true }}
                         enablePaging
-                        page={page}
+                        // page={page}
                         onLoadComplete={(pages) => {
                             setTotalPages(pages);
                             setLoading(false);

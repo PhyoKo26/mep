@@ -48,6 +48,7 @@ const Header: React.FC<HeaderProps> = ({
           </TouchableOpacity>
         )}
         <AppText
+          numberOfLines={1}
           weight="semibold"
           className={cn('flex-1 text-lg', titleClassName)}
           style={{ marginHorizontal: showBackButton ? 0 : 10 }}

@@ -44,8 +44,8 @@ const OtpScreen = () => {
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
       {/* <AuthHeader /> */}
       <FormWrapper extraScrollHeight={75} wrapperStyle={{ flex: 1 }}>
-        <View className='items-center' style={{ marginTop: HEIGHT / 10 }}>
-          <Image source={logoSrc} style={{ width: WIDTH / 1.3 }} resizeMode="contain" />
+        <View className='items-center' style={{ marginVertical: HEIGHT / 10 }}>
+          <Image source={logoSrc} style={{ width: WIDTH / 1.3, height: WIDTH / 4 }} resizeMode="contain" />
         </View>
 
         <View className="flex px-5 gap-10 rounded-2xl">

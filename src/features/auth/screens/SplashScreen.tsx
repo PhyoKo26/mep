@@ -78,7 +78,7 @@ const SplashScreen = () => {
         className={cn('absolute w-screen justify-center items-center',)}
       >
         <Animated.View style={logoAnimatedStyle}>
-          <Image source={logoSrc} style={{ width: WIDTH / 1.3 }} resizeMode="contain" />
+          <Image source={logoSrc} style={{ width: WIDTH / 1.3, height: WIDTH / 4 }} resizeMode="contain" />
         </Animated.View>
       </View>
       {showButtons && (

@@ -25,7 +25,7 @@ const BookPlayScreen = () => {
     const [isLoading, setIsLoading] = useState(true);
     const progressIntervalRef = useRef<any>(null);
 
-    const mp3Url = audioUrl || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3';
+    const mp3Url = audioUrl || 'https://data2.bagankeyboard.com/resource/others/January_01.mp3';
 
     // ✅ PROGRESS UPDATE INTERVAL - Start when playing
     useEffect(() => {
