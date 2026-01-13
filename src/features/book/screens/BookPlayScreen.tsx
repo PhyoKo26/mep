@@ -87,19 +87,50 @@ const BookPlayScreen = () => {
         }
     };
 
+    // const seekTo = async (value: number) => {
+    //     try {
+    //         await SoundPlayer.seek(value);
+    //         setPosition(value);
+    //     } catch (error) {
+    //         console.log('Seek error:', error);
+    //     }
+    // };
     const seekTo = async (value: number) => {
         try {
-            await SoundPlayer.seek(value);
-            setPosition(value);
+            const clampedValue = Math.max(0, Math.min(duration, value));
+            await SoundPlayer.seek(clampedValue);
+            setPosition(clampedValue);
+
+            // Auto-pause if seeking to exact end
+            if (Math.abs(clampedValue - duration) < 1) {
+                await SoundPlayer.pause();
+                setIsPlaying(false);
+            }
         } catch (error) {
             console.log('Seek error:', error);
         }
     };
 
+    // const onProgressUpdate = async () => {
+    //     try {
+    //         const info = await SoundPlayer.getInfo();
+    //         setPosition(info.currentTime || 0);
+    //     } catch (error) {
+    //         console.log('Progress error:', error);
+    //     }
+    // };
     const onProgressUpdate = async () => {
         try {
             const info = await SoundPlayer.getInfo();
-            setPosition(info.currentTime || 0);
+            const currentPos = info.currentTime || 0;
+            setPosition(currentPos);
+
+            // Auto-pause when reaching end (±1s tolerance)
+            if (currentPos >= duration - 1) {
+                setIsPlaying(false);
+                await SoundPlayer.pause();
+                setPosition(duration); // Snap to end
+            }
         } catch (error) {
             console.log('Progress error:', error);
         }
@@ -132,6 +163,7 @@ const BookPlayScreen = () => {
                             maximumValue={duration}
                             value={position}
                             onSlidingComplete={seekTo}
+                            step={1}  // Snap to seconds
                             minimumTrackTintColor="#3847BB"
                             maximumTrackTintColor="#CFCFCF"
                             thumbTintColor="#3847BB"

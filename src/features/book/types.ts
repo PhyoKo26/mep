@@ -3,6 +3,7 @@ export type BookListsStackParamList = {
   BookDetailScreen: { id: number | string };
   BookBuyScreen: { bookDetail: string };
   BookReadScreen: { title: string, bookURL: string };
+  BookPlaylistScreen: { bookDetail: {} | string };
   BookPlayScreen: { bookDetail: {} | string };
 };
 

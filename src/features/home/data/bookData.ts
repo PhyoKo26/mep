@@ -6,6 +6,32 @@ export default [
         author: 'John Piper',
         price: '5000',
         pdfURL: 'https://data2.bagankeyboard.com/resource/others/daily.pdf',
+        audioUrl: [
+            {
+                name: 'January 01',
+                url: 'https://data2.bagankeyboard.com/resource/others/January_01.mp3'
+            },
+            {
+                name: 'January 02',
+                url: 'https://data2.bagankeyboard.com/resource/others/January_02.mp3'
+            },
+            {
+                name: 'January 03',
+                url: 'https://data2.bagankeyboard.com/resource/others/January_03.mp3'
+            },
+            {
+                name: 'January 04',
+                url: 'https://data2.bagankeyboard.com/resource/others/January_04.mp3'
+            },
+            {
+                name: 'January 05',
+                url: 'https://data2.bagankeyboard.com/resource/others/January_05.mp3'
+            },
+            {
+                name: 'January 06',
+                url: 'https://data2.bagankeyboard.com/resource/others/January_06.mp3'
+            }
+        ],
         descriptions: '1: 31 meditations connecting you to God.\n2: Live knowing life is short.\n3: Eternity is long ahead.\n4: Faith stirred daily.\n5: Redeem every moment.'
     },
     {
@@ -43,5 +69,50 @@ export default [
         price: '7000',
         pdfURL: 'https://data2.bagankeyboard.com/resource/others/Fifty%20Reasons%20Myammar.pdf',
         descriptions: '1: Behold Christ\'s glory.\n2: Savor His presence.\n3: Joy in the Savior.\n4: Worship transforms life.\n5: Eternal satisfaction found.'
+    },
+    {
+        id: '6',
+        image: 'https://data2.bagankeyboard.com/resource/others/Biblical_Theology.jpg',
+        title: 'သမ္မာကျမ်းစာဆိုင်ရာ သီသြလော်ဂျီ',
+        author: 'Nick Roark AND Robert Cline',
+        price: '7000',
+        pdfURL: 'https://data2.bagankeyboard.com/resource/others/Biblical_Theology.pdf',
+        descriptions: 'BIBLICAL THEOLOGY \nHow the church faithfully teaches the gospel'
+    },
+    {
+        id: '7',
+        image: 'https://data2.bagankeyboard.com/resource/others/Church_Discipline.jpg',
+        title: 'အသင်းတော်၏ စည်းမျဥ်းစည်းကမ်း',
+        author: 'Jonathan Leeman',
+        price: '7000',
+        pdfURL: 'https://data2.bagankeyboard.com/resource/others/Church_Discipline.pdf',
+        descriptions: 'CHRUCH DISCIPLINE \nHow the church protects the name of JESUS'
+    },
+    {
+        id: '8',
+        image: 'https://data2.bagankeyboard.com/resource/others/Church_Membership.jpg',
+        title: 'အသင်းတော်၏ အသင်းဝင်ဖြစ်တည်မှု',
+        author: 'Jonathan Leeman',
+        price: '7000',
+        pdfURL: 'https://data2.bagankeyboard.com/resource/others/Church_Membership.pdf',
+        descriptions: 'CHURCH MEMEBERSHIP \nHow the world knows who represents JESUS'
+    },
+    {
+        id: '9',
+        image: 'https://data2.bagankeyboard.com/resource/others/Sound_Doctrine_Final.jpg',
+        title: 'မှန်ကန်သော ခံယူချက်',
+        author: 'Bobby Jamieson',
+        price: '7000',
+        pdfURL: 'https://data2.bagankeyboard.com/resource/others/Sound_Doctrine_Final.pdf',
+        descriptions: 'SOUND DOCTRINE \nHow a church grows in the love and holiness of god'
+    },
+    {
+        id: '10',
+        image: 'https://data2.bagankeyboard.com/resource/others/The_Gospel.jpg',
+        title: 'ဧဝံဂေလိတရား',
+        author: 'Ray Ortlund',
+        price: '7000',
+        pdfURL: 'https://data2.bagankeyboard.com/resource/others/The_Gospel.pdf',
+        descriptions: 'THE GOSPEL \nHow the church portrays the beauty of christ'
     }
 ];

@@ -5,6 +5,7 @@ import BookListsScreen from './screens/BookListsScreen';
 import BookDetailScreen from './screens/BookDetailScreen';
 import BookBuyScreen from './screens/BookBuyScreen';
 import BookReadScreen from './screens/BookReadScreen';
+import BookPlaylistScreen from './screens/BookPlaylistScreen';
 import BookPlayScreen from './screens/BookPlayScreen';
 
 const BookStack = createStackNavigator<BookListsStackParamList>();
@@ -21,6 +22,7 @@ export default function BookNavigator() {
       <BookStack.Screen name="BookDetailScreen" component={BookDetailScreen} />
       <BookStack.Screen name="BookBuyScreen" component={BookBuyScreen} />
       <BookStack.Screen name="BookReadScreen" component={BookReadScreen} />
+      <BookStack.Screen name="BookPlaylistScreen" component={BookPlaylistScreen} />
       <BookStack.Screen name="BookPlayScreen" component={BookPlayScreen} />
     </BookStack.Navigator>
   );

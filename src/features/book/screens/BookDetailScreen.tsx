@@ -32,6 +32,11 @@ const BookDetailScreen = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  const getRandomItems = (arr: any[], count = 3) =>
+    [...arr].sort(() => Math.random() - 0.5).slice(0, count);
+
+  const randomBooks = getRandomItems(bookData, 3);
+
   return (
     <ScreenWrapper
       header={<Header title={BOOK.title} onBackPress={appNavigation.goBack} />}
@@ -85,10 +90,10 @@ const BookDetailScreen = () => {
               </LinearButton>
               <LinearButton
                 gradientClassName="h-12"
-                onPress={() => appNavigation.navigate('BookPlayScreen', { bookDetail: BOOK })}
+                onPress={() => appNavigation.navigate('BookPlaylistScreen', { bookDetail: BOOK })}
                 style={{ width: WIDTH / 2.3, alignSelf: 'center' }}
-              // isLoading={isPending}
-              // disabled={isPending}
+                // isLoading={isPending}
+                disabled={!BOOK.audioUrl}
               >
                 <View className='flex-row'>
                   <Headphones size={30} color="#FFFFFF" />
@@ -117,7 +122,7 @@ const BookDetailScreen = () => {
           <View className='px-6 bg-secondary/10'>
             <BookList
               title="Related Book"
-              books={bookData.slice(1, 4).reverse() as any}
+              books={randomBooks}
               onSeeAllPress={() => appNavigation.navigate('BookStack', { screen: 'BookListsScreen', params: { title: 'New Releases' } })}
               onBookPress={(book) => appNavigation.navigate('BookStack', { screen: 'BookDetailScreen', params: { id: book.id } })}
             />
