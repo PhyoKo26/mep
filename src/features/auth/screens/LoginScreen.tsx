@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Dimensions, Platform, StatusBar, TouchableOpacity, View, ImageBackground, Image } from 'react-native';
 import { AppText, LinearButton, ScreenWrapper } from 'components';
 import { FormInputLogin, FormWrapper } from 'components/form';
@@ -13,6 +13,8 @@ import { cn, formatMyanmarPhoneNumber } from 'utils/helpers';
 import HapticFeedback from 'react-native-haptic-feedback';
 import { useAuth } from '../hooks/useAuth';
 import LinearGradient from 'react-native-linear-gradient';
+import { LoginRequest } from 'types/api.request';
+
 const { width: WIDTH, height: HEIGHT } = Dimensions.get('window');
 const isIOS = Platform.OS === 'ios';
 const PhoneIcon = require('assets/icons/auth/phone.png');
@@ -27,12 +29,16 @@ const LoginScreen = () => {
   const deviceInfo = useDeviceInfo();
   const { resetOnboarding } = useOnboardingStore();
 
-  const { useRequestOTP } = useAuth();
+  const { useLogin } = useAuth();
 
-  const { mutate: handleRequestOTP, isPending } = useRequestOTP;
+  const { mutate: handleLogin, isPending } = useLogin;
   const loginSchema = LoginSchema();
   const methods = useForm<LoginSchemaType>({
     resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
     mode: 'onChange',
   });
 
@@ -55,9 +61,20 @@ const LoginScreen = () => {
   //   }
   // });
 
-  const onLogin = handleSubmit((data) => {
-    appNavigation.navigate('OtpScreen');
-  });
+  // const onLogin = handleSubmit((data) => {
+  //   // appNavigation.navigate('OtpScreen');
+  // });
+
+  const onLogin = useCallback(
+    handleSubmit(({ email, password }) => {
+      const reqBody: LoginRequest = {
+        email,
+        password,
+      };
+      handleLogin(reqBody);
+    }),
+    [handleSubmit]
+  );
 
   return (
     <LinearGradient
@@ -74,7 +91,7 @@ const LoginScreen = () => {
           <Image source={logoSrc} style={{ width: WIDTH / 1.3, height: WIDTH / 4 }} resizeMode="contain" />
         </View>
 
-        <View className="flex px-5 gap-10 rounded-2xl">
+        <View className="flex px-5 gap-5 rounded-2xl">
           <FormProvider {...methods}>
             <FormInputLogin
               name="email"
@@ -84,18 +101,46 @@ const LoginScreen = () => {
               keyboardType="email-address"
               maxLength={50}
             />
+            <FormInputLogin
+              name="password"
+              label={t.password}
+              placeholder={t.typeYourPassword}
+              // leftIcon={LockIcon}
+              keyboardType="default"
+              maxLength={50}
+              isPassword={true}
+            />
             <LinearButton
               gradientClassName="h-12"
-              style={{ width: WIDTH / 1.1, alignSelf: 'center' }}
+              style={{ width: WIDTH / 1.1, alignSelf: 'center', marginTop: 24 }}
               onPress={onLogin}
               isLoading={isPending}
               disabled={isPending}
-              variant={'outline'}
-              outlineColor={'#FFFFFF'}
+              // variant={'outline'}
+              // outlineColor={'#FFFFFF'}
+              colors={['#FFCC00', '#FFB800']}
+              textClassName="text-black text-base"
             >
-              {/* {t.logIn} */}{'GET OTP'}
+              {t.logIn}
+              {/* {'GET OTP'} */}
             </LinearButton>
           </FormProvider>
+
+          <View className="items-center gap-8 mt-6">
+            <AppText className="text-white text-base"
+            // onPress={handleOnPressForgotPassword}
+            >
+              Forgot Password?
+            </AppText>
+            <AppText className="text-white text-base">
+              {`Don't have an account? `}
+              <AppText weight='bold' className="text-white text-base"
+                onPress={() => appNavigation.navigate('RegisterStack')}
+              >
+                Sign Up
+              </AppText>
+            </AppText>
+          </View>
         </View>
       </FormWrapper>
       {/* </ScreenWrapper> */}

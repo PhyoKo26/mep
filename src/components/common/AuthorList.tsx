@@ -10,7 +10,7 @@ const CARD_WIDTH = WIDTH / 2.8;
 
 type AuthorListProps = {
     title: string;
-    authors: Author[];
+    authors: any;
     onSeeAllPress?: () => void;
     onAuthorPress?: (author: Author) => void;
 };
@@ -23,26 +23,30 @@ const AuthorList = ({
 }: AuthorListProps) => {
     const { appNavigation } = useAppNavigate();
 
-    const renderAuthorCard = ({ item, index }: { item: Author; index: number }) => (
-        <TouchableOpacity
-            className={`w-26 ${index === authors.length - 1 ? '' : 'mr-4'}`}
-            onPress={() => onAuthorPress?.(item)}
-        >
-            <Image
-                source={{ uri: item.image }}
-                className="w-28 h-32 rounded-3xl mb-2"
-                resizeMode="cover"
-            />
-            <AppText language='mm' className="text-xs line-clamp-1">
-                {item.name}
-            </AppText>
-        </TouchableOpacity>
-    );
+    const renderAuthorCard = ({ item, index }: { item: Author; index: number }) => {
+        return (
+            <TouchableOpacity
+                className={`w-26 bg-red ${index === authors.length - 1 ? '' : 'mr-4'}`}
+                onPress={() => onAuthorPress?.(item)}
+            >
+                <Image
+                    source={{
+                        uri: item.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.name)}&size=128&background=4F46E5&color=fff`
+                    }}
+                    className="w-28 h-32 rounded-3xl mb-2"
+                    resizeMode="cover"
+                />
+                <AppText language='mm' className="w-28 text-xs text-center line-clamp-3">
+                    {item.name}
+                </AppText>
+            </TouchableOpacity>
+        )
+    };
 
     return (
         <View className="w-full py-2">
             <View className="flex-row justify-between items-center mb-2">
-                <AppText weight='bold' className="text-xl text-gray-900">
+                <AppText weight='bold' className="text-lg text-gray-900">
                     {title}
                 </AppText>
                 <TouchableOpacity
@@ -57,7 +61,7 @@ const AuthorList = ({
             <FlatList
                 data={authors}
                 renderItem={renderAuthorCard}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item) => item.id.toString()}
                 horizontal
                 showsHorizontalScrollIndicator={false}
             // contentContainerStyle={{ paddingRight: 20 }}

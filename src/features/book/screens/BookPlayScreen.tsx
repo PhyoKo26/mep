@@ -17,7 +17,7 @@ const BookPlayScreen = () => {
     const { appNavigation } = useAppNavigate();
     const route = useRoute();
     const { bookDetail } = route.params || {};
-    const { title, image, author, audioUrl } = bookDetail as Book;
+    const { title, image, author, audioUrl } = bookDetail;
 
     const [isPlaying, setIsPlaying] = useState(false);
     const [duration, setDuration] = useState(0);
@@ -153,7 +153,7 @@ const BookPlayScreen = () => {
                         resizeMode="cover"
                     />
                     <AppText weight='medium' className="text-base mt-6">{title}</AppText>
-                    <AppText weight='medium'>Author - {author}</AppText>
+                    <AppText weight='medium'>Author - {author.name}</AppText>
 
                     {/* ✅ Progress - Now Updates! */}
                     <View className="mt-8">

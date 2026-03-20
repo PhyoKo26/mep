@@ -15,7 +15,7 @@ export default function AuthNavigator() {
         ...TransitionPresets.SlideFromRightIOS,
       }}
     >
-      <AuthStack.Screen name="SplashScreen" component={SplashScreen} />
+      {/* <AuthStack.Screen name="SplashScreen" component={SplashScreen} /> */}
       <AuthStack.Screen name="LoginScreen" component={LoginScreen} />
       <AuthStack.Screen name="OtpScreen" component={OtpScreen} />
     </AuthStack.Navigator>

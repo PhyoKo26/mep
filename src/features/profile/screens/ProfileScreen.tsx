@@ -1,40 +1,99 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ActivityIndicator, View, Platform, TouchableOpacity, FlatList, Image, Dimensions, TextInput } from 'react-native';
-import { AppText, Header, ScreenWrapper } from 'components';
-import { useAppNavigate } from 'hooks';
+import { AppText, ConfirmModal, Header, ScreenWrapper } from 'components';
+import { useAppNavigate, useTranslation } from 'hooks';
 import { useRoute } from '@react-navigation/native';
 import bookData from 'features/home/data/bookData';
-import { Pencil, Mail, Phone, ChevronRight, UserRound, Earth } from 'lucide-react-native';
+import { Pencil, Mail, Phone, ChevronRight, UserRound, Earth, LogOutIcon, ChevronRightCircle, CircleUserRound } from 'lucide-react-native';
 import { Profile } from '../types';
 import FastImage from 'react-native-fast-image';
 import { PhotoOptionsModal } from 'components/photo-options/PhotoOptionsModal';
+import { useAuthStore } from 'store';
+import { NavigationService } from 'navigation/NavigationService';
+import { cn } from 'utils/helpers';
+import { useGetUser } from '../hooks/useProfile';
 
 const { width: WIDTH } = Dimensions.get('window');
 const isIOS = Platform.OS === 'ios';
 
 const ProfileScreen = () => {
   const { appNavigation } = useAppNavigate();
+  const t = useTranslation();
 
-  const [isLoading, setIsLoading] = useState(true);
+  const { fcmToken, logout, isNotificationEnabled, setIsNotificationEnabled } = useAuthStore();
+
+  const { data: userData, isPending } = useGetUser();
+
   const [edit, setEdit] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const [profile, setProfile] = useState<any>('');
-  const [name, setName] = useState('Andreas');
-  const [email, setEmail] = useState('andreas@mail.com');
-  const [phone, setPhone] = useState('+959199199199');
-
-  const fields = [
-    { Icon: UserRound, value: name, setter: setName, placeholder: 'Enter name' },
-    { Icon: Mail, value: email, setter: setEmail, placeholder: 'Enter email', keyboardType: 'email-address' },
-    { Icon: Phone, value: phone, setter: setPhone, placeholder: 'Enter phone', keyboardType: 'phone-pad' }
-  ];
+  // const [name, setName] = useState('Andreas');
+  // const [email, setEmail] = useState('andreas@mail.com');
+  // const [phone, setPhone] = useState('+959199199199');
+  const [profileData, setProfileData] = useState({
+    user_id: '',
+    name: '',
+    email: '',
+    avatar: '',
+    auth_type: '',
+    phone: ''
+  });
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+    if (userData) {
+      setProfileData({
+        user_id: userData.user_id || '',
+        name: userData.name || '',
+        email: userData.email || '',
+        avatar: userData.avatar || '',
+        auth_type: userData.auth_type || '',
+        phone: userData.phone || ''
+      });
+    }
+  }, [userData]);
 
-    return () => clearTimeout(timer);
+  // const fields = [
+  //   { Icon: UserRound, value: name, setter: setName, placeholder: 'Enter name' },
+  //   { Icon: Mail, value: email, setter: setEmail, placeholder: 'Enter email', keyboardType: 'email-address' },
+  //   { Icon: Phone, value: phone, setter: setPhone, placeholder: 'Enter phone', keyboardType: 'phone-pad' }
+  // ];
+  const fields = [
+    { Icon: UserRound, key: 'name' as const, placeholder: 'Enter name' },
+    { Icon: Mail, key: 'email' as const, placeholder: 'Enter email', keyboardType: 'email-address' },
+    // { Icon: Phone, key: 'phone' as const, placeholder: 'Enter phone', keyboardType: 'phone-pad' }
+  ];
+
+  // ✅ Dynamic update function
+  const updateField = (key: keyof typeof profileData, value: string) => {
+    setProfileData(prev => ({ ...prev, [key]: value }));
+  };
+
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     setIsLoading(false);
+  //   }, 1000);
+
+  //   return () => clearTimeout(timer);
+  // }, []);
+
+  const options = [
+    { Icon: LogOutIcon, label: t.logout, onPress: () => setShowConfirmModal(true) },
+  ];
+
+  const handleOnLogout = useCallback(() => {
+    // if (user?.id) {
+    //   fetchLogoutMutation({
+    //     device_id: deviceInfo.udid,
+    //     fcm_token: fcmToken
+    //   });
+    // } else {
+    logout();
+    // setTimeout(() => {
+    //   NavigationService.reset('AuthStack');
+    // }, 500)
+    // resetDatabase();
+    // }
   }, []);
 
   const handleImageSelected = useCallback((base64: string, asset: any) => {
@@ -47,35 +106,36 @@ const ProfileScreen = () => {
 
   return (
     <ScreenWrapper
+      isShowLoadingModal={isPending}
       header={
         <Header
           title={"Profile"}
           onBackPress={appNavigation.goBack}
           showBackButton={false}
-          RightIcon={
-            <TouchableOpacity onPress={onSubmit} className='bg-secondary rounded-full'>
-              <AppText weight="medium" className="mx-3 text-white">
-                {!edit && <Pencil size={11} color="white" />}
-                {edit ? 'Done' : ' Edit'}
-              </AppText>
-            </TouchableOpacity>
-          }
+          // RightIcon={
+          //   <TouchableOpacity onPress={onSubmit} className='bg-secondary rounded-full'>
+          //     <AppText weight="medium" className="mx-3 text-white">
+          //       {!edit && <Pencil size={11} color="white" />}
+          //       {edit ? 'Done' : ' Edit'}
+          //     </AppText>
+          //   </TouchableOpacity>
+          // }
         />
       }
-      isShowLoadingModal={isLoading}
+    // isShowLoadingModal={isLoading}
     >
-      {isLoading ? <></> :
+      {isPending ? <></> :
         <View className="pt-4 px-6">
           <View className="items-center mb-6">
-            <TouchableOpacity
+            {/* <TouchableOpacity
               disabled={!edit}
               onPress={() => setModalVisible(true)}
               className="relative w-[100px] h-[100px] overflow-hidden self-center bg-[#D9D9D9] rounded-full justify-center items-center"
             >
-              {profile ? (
+              {profileData?.avatar ? (
                 <FastImage
                   source={{
-                    uri: `${profile?.uri}?t=${new Date().getTime()}`,
+                    uri: `${profileData?.avatar}?t=${new Date().getTime()}`,
                     priority: FastImage.priority.normal,
                     cache: FastImage.cacheControl.web,
                   }}
@@ -89,15 +149,16 @@ const ProfileScreen = () => {
                   resizeMode={FastImage.resizeMode.cover}
                 />
               )}
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             {/* <Image
               source={{ uri: 'https://image.tmdb.org/t/p/w500/9MOY95jds58WtvEwUTYZgXlTVr0.jpg' }}
               className="w-24 h-24 rounded-full"
             /> */}
-            <AppText weight='semibold' className="text-lg mt-3">ID: 0123456789</AppText>
+            <CircleUserRound size={100} color="#3847BB" />
+            <AppText weight='semibold' className="text-lg mt-3">ID: {`${profileData?.user_id}`}</AppText>
           </View>
 
-          {fields.map(({ Icon, value, setter, placeholder, keyboardType }, i) => (
+          {/* {fields.map(({ Icon, value, setter, placeholder, keyboardType }, i) => (
             <View key={i} className="flex-row items-center justify-between py-4">
               <View className="flex-row items-center flex-1">
                 <Icon size={20} />
@@ -108,15 +169,62 @@ const ProfileScreen = () => {
                 )}
               </View>
             </View>
+          ))} */}
+          {fields.map(({ Icon, key, placeholder, keyboardType }, i) => (
+            <View key={i} className="flex-row items-center justify-between py-4">
+              <View className="flex-row items-center flex-1">
+                <Icon size={20} />
+                {edit ? (
+                  <TextInput
+                    className="w-5/6 ml-7 px-5 text-base border border-gray-300 rounded-xl"
+                    value={profileData[key]}           // ✅ Now shows "YeYe", "koye2@example.com"
+                    onChangeText={(value) => updateField(key, value)}
+                    placeholder={placeholder}
+                    keyboardType={keyboardType as any}
+                  />
+                ) : (
+                  <AppText className="ml-5 mt-1 text-base">
+                    {profileData[key] || placeholder}
+                  </AppText>
+                )}
+              </View>
+            </View>
           ))}
 
-          <TouchableOpacity className="flex-row items-center justify-between py-4">
+          {/* <TouchableOpacity className="flex-row items-center justify-between py-4">
             <View className="flex-row items-center">
               <Earth size={20} />
               <AppText className="ml-5 mt-1 text-base">Language</AppText>
             </View>
             <ChevronRight size={30} />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
+
+          <View className="px-4 mt-5 self-center">
+            {options.map(({ Icon, label, onPress }, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={onPress}
+                className={cn(
+                  'flex-row items-center bg-white rounded-2xl p-4 my-2 mx-3 px-10',
+                  'shadow-sm border border-gray-200'
+                )}
+                style={{
+                  // iOS shadow
+                  shadowColor: '#0580E2',
+                  shadowOpacity: 0.1,
+                  shadowRadius: 6,
+                  shadowOffset: { width: 0, height: 3 },
+                  // Android elevation
+                  elevation: 4,
+                }}
+              >
+                <View className="flex-row items-center">
+                  <Icon />
+                  <AppText className={cn('ml-5')}>{label}</AppText>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
       }
 
@@ -125,6 +233,18 @@ const ProfileScreen = () => {
         onClose={() => setModalVisible(false)}
         onImageSelected={handleImageSelected}
       />
+
+      {
+        showConfirmModal && (
+          <ConfirmModal
+            isVisible={showConfirmModal}
+            title={t.are_you_sure_want_to_logout}
+            onClose={() => setShowConfirmModal(false)}
+            onSubmit={handleOnLogout}
+            confirmText={t.logout}
+          />
+        )
+      }
     </ScreenWrapper>
   );
 };

@@ -62,10 +62,10 @@ apiClient.interceptors.response.use(
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      const { refreshToken, setToken, logout } = useAuthStore.getState();
+      const { refreshToken, setToken, setRefreshToken, logout } = useAuthStore.getState();
 
       if (!refreshToken) {
-        // logout();
+        logout();
         return Promise.reject(error);
       }
 
@@ -78,26 +78,25 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const response = await axios.post(`${API_URL}/app_api/auth/refresh-token`, {
-          refreshToken,
+        const response = await axios.post(`${API_URL}/auth/refresh`, {
+          refresh_token: refreshToken,
         });
 
         console.log("Refresh token response:", response.data);
-
-        const { accessToken, tokenType } = response.data;
-
-        setToken(accessToken, tokenType);
+        const { accessToken, refresh_token } = response.data;
+        setToken(accessToken, 'Bearer');
+        setRefreshToken(refresh_token, 'Bearer');
 
         processQueue(null, accessToken);
 
         if (!originalRequest.headers) {
           originalRequest.headers = {};
         }
-        originalRequest.headers.Authorization = `${tokenType} ${accessToken}`;
+        originalRequest.headers.Authorization = `${'Bearer'} ${accessToken}`;
         return apiClient(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
-        // logout();
+        logout();
 
         Toast.show({
           type: "error",

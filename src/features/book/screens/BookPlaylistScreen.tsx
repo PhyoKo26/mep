@@ -14,7 +14,7 @@ const BookPlaylistScreen = () => {
   const { appNavigation } = useAppNavigate();
   const route = useRoute();
   const { bookDetail } = route.params || {};
-  const { title, image, author, audioUrl } = bookDetail as Book;
+  const { title, cover_image, author, audio_urls } = bookDetail as Book;
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -30,7 +30,7 @@ const BookPlaylistScreen = () => {
     appNavigation.navigate('BookPlayScreen', {
       bookDetail: {
         title: track.name,
-        image: image,
+        image: cover_image,
         author: author,
         audioUrl: track.url
       }
@@ -42,7 +42,7 @@ const BookPlaylistScreen = () => {
       <View className="flex-row p-6">
         <View className="w-2/5 mr-4">
           <Image
-            source={{ uri: image }}
+            source={{ uri: cover_image }}
             style={{ width: '100%', height: WIDTH / 2.2 }}
             className="rounded-2xl"
             resizeMode="cover"
@@ -53,13 +53,13 @@ const BookPlaylistScreen = () => {
             {title}
           </AppText>
           <AppText language='mm' className="text-base mb-3 text-gray-600">
-            Author - {author}
+            Author - {author.name}
           </AppText>
         </View>
       </View>
 
       <FlatList
-        data={audioUrl}
+        data={audio_urls}
         renderItem={({ item }: any) => (
           <TouchableOpacity
             className="flex-row items-center px-6 py-4 border-b border-gray-200"

@@ -3,7 +3,7 @@ export type AuthorListsStackParamList = {
 };
 
 export type Author = {
-  id: string;
-  image: any;
+  id: number;
   name: string;
+  avatar: string | null;
 };

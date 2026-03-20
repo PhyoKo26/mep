@@ -1,6 +1,6 @@
 export interface LoginRequest {
-  phone: string;
-  fcmToken: string;
+  email: string;
+  fcmToken?: string | null;
   password: string;
 }
 
@@ -8,15 +8,11 @@ export interface CreateUserRequest {
   fcmToken?: string | null;
   deviceId?: string | null;
   name: string;
-  phone: string;
+  phone?: string;
   otp?: string;
-  role?: 'User' | 'Admin';
-  birthDate: string;
-  status?: 'Single' | 'Married' | 'Pregnant';
-  weight?: string;
   township?: string;
   division?: string;
-  familyPlan?: 'AvoidPregnant' | 'Conceiving';
+  email?: string;
   password?: string;
 }
 

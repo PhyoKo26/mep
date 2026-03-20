@@ -10,11 +10,12 @@ export const LoginSchema = () => {
 
   return useMemo(() => {
     return z.object({
-      email: z.string().email('Invalid email address').min(1, t.requireEmail),
-      // password: z
-      //   .string({
-      //     required_error: t.requirePassword,
-      //   }),
+      email: z.string()
+        .nonempty(t.requireEmail)
+        .email('Invalid email address'),
+      password: z.string()
+        .nonempty(t.requirePassword)
+        .min(8, t.atleast8),
     });
   }, [lang, t]);
 };

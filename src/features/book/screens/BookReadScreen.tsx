@@ -23,29 +23,29 @@ const BookReadScreen = () => {
     const [totalPages, setTotalPages] = useState(0);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        downloadPdf();
-    }, []);
+    // useEffect(() => {
+    //     downloadPdf();
+    // }, []);
 
-    const downloadPdf = async () => {
-        console.log(bookURL);
+    // const downloadPdf = async () => {
+    //     console.log(bookURL);
         
-        try {
-            const { fs } = RNBlobUtil;
-            const path = `${fs.dirs.CacheDir}/book.pdf`;
+    //     try {
+    //         const { fs } = RNBlobUtil;
+    //         const path = `${fs.dirs.CacheDir}/book.pdf`;
 
-            const res = await RNBlobUtil.config({
-                path,
-                fileCache: true,
-            }).fetch('GET', bookURL);
+    //         const res = await RNBlobUtil.config({
+    //             path,
+    //             fileCache: true,
+    //         }).fetch('GET', bookURL);
 
-            setLocalPath(`file://${res.path()}`);
-        } catch (err) {
-            console.error(err);
-            Alert.alert('Error', 'Failed to download PDF');
-            setLoading(false);
-        }
-    };
+    //         setLocalPath(`file://${res.path()}`);
+    //     } catch (err) {
+    //         console.error(err);
+    //         Alert.alert('Error', 'Failed to download PDF');
+    //         setLoading(false);
+    //     }
+    // };
     // const downloadPdf = async () => {
     //     try {
     //         const { fs } = RNBlobUtil;
@@ -96,16 +96,16 @@ const BookReadScreen = () => {
     return (
         <ScreenWrapper
             header={<Header title={title} onBackPress={appNavigation.goBack} />}
-            isShowLoadingModal={!localPath}
+            isShowLoadingModal={!bookURL}
         >
             <View className="flex-1 bg-white">
-                {!localPath ? (
+                {!bookURL ? (
                     // <ActivityIndicator size="large" style={{ marginTop: '100%' }} />
                     <></>
                 ) : (
                     <Pdf
                         ref={pdfRef}
-                        source={{ uri: localPath, cache: true }}
+                        source={{ uri: bookURL, cache: true }}
                         enablePaging
                         // page={page}
                         onLoadComplete={(pages) => {

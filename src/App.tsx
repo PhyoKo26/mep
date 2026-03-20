@@ -34,11 +34,11 @@ const App: React.FC = () => {
     isNotificationEnabled,
   } = useAuthStore();
 
-  useEffect(() => {
-    if (!authData) {
-      setToken('', '');
-    }
-  }, [authData]);
+  // useEffect(() => {
+  //   if (!authData) {
+  //     setToken('', '');
+  //   }
+  // }, [authData]);
 
   useEffect(() => {
     setIsAuthenticated(!!token);

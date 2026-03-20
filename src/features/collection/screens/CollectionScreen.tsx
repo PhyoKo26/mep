@@ -1,19 +1,51 @@
 import React, { useState, useMemo } from 'react';
-import { View, TouchableOpacity, FlatList, Image } from 'react-native';
+import { View, TouchableOpacity, FlatList, Image, RefreshControl, ActivityIndicator } from 'react-native';
 import { ScreenWrapper, Header, AppText } from 'components';
 import bookData from 'features/home/data/bookData';
 import { Book } from 'features/book/types';
 import { useAppNavigate } from 'hooks';
+import { useGetMyCollections } from '../hooks/useCollection';
+import queryClient from 'utils/queryClient';
 
 const MyCollectionScreen = () => {
   const { appNavigation } = useAppNavigate();
-  const [activeTab, setActiveTab] = useState<'book' | 'audio'>('book');
+  const [activeTab, setActiveTab] = useState<'approved' | 'pending'>('approved');
+
+  const pageLimit = 10;
+  const {
+    data,
+    isLoading,
+    isFetching,
+    fetchNextPage,
+    hasNextPage,
+    refetch,
+  } = useGetMyCollections({ limit: pageLimit });
+
+  const myApproved = data?.pages.flatMap(page => page.data.approved) ?? [];
+  const myPending = data?.pages.flatMap(page => page.data.pending) ?? [];
+
+  // console.log('useGetMyCollections', myApproved, myPending);
+
+  const onRefresh = () => {
+    // if (!deviceInfo.udid) return;
+    queryClient.removeQueries({
+      queryKey: ['my-collections'],
+      // exact: true,
+    });
+    refetch();
+  };
+
+  const loadMore = () => {
+    if (hasNextPage && !isFetching) {
+      fetchNextPage();
+    }
+  };
 
   let filtered: any = [];
-  if (activeTab == 'book') {
-    filtered = bookData.filter(item => item.id !== '2');
+  if (activeTab == 'approved') {
+    filtered = myApproved;
   } else {
-    filtered = bookData.filter(item => item.id === '2');
+    filtered = myPending;
   }
 
   const renderItem = ({ item }: { item: Book }) => {
@@ -26,7 +58,7 @@ const MyCollectionScreen = () => {
       >
         {/* Left image */}
         <Image
-          source={{ uri: item.image }}
+          source={{ uri: item.cover_image }}
           className="w-[70px] h-[100px] rounded-lg bg-gray-200"
           resizeMode="cover"
         />
@@ -37,11 +69,11 @@ const MyCollectionScreen = () => {
             {item.title}
           </AppText>
           <AppText className="text-sm text-gray-600 mb-3">
-            {item.author}
+            {item.author.name}
           </AppText>
 
           {/* Progress row */}
-          <View className="flex-row justify-between items-center">
+          {/* <View className="flex-row justify-between items-center">
             <View className="w-4/5 h-[6px] bg-gray-200 rounded-full overflow-hidden">
               <View
                 className="h-full bg-secondary rounded-full"
@@ -51,7 +83,7 @@ const MyCollectionScreen = () => {
             <AppText className="text-xs font-medium">
               {progressPercent * 100 == 100 ? 'Done' : Number(progressPercent * 100).toFixed(0) + '%'}
             </AppText>
-          </View>
+          </View> */}
         </View>
       </TouchableOpacity>
     );
@@ -59,50 +91,76 @@ const MyCollectionScreen = () => {
 
   return (
     <ScreenWrapper
-      header={<Header title="My Collection" />}
+      header={<Header title="My Collection" showBackButton={false} />}
       isScrollable={false}
+      isShowLoadingModal={isLoading}
     >
       <View className="flex-1 px-4 pt-4">
         {/* Tabs at top-left - Fixed Tailwind */}
         <View className="flex-row">
           <TouchableOpacity
-            onPress={() => setActiveTab('book')}
-            className="px-8 py-3 mr-6"
+            onPress={() => setActiveTab('approved')}
+            className="px-4 py-3 mr-6"
           >
             <AppText
-              weight={activeTab === 'book' ? 'semibold' : 'normal'}
-              className={`text-lg pb-1 ${activeTab === 'book'
+              weight={activeTab === 'approved' ? 'semibold' : 'normal'}
+              className={`text-lg pb-1 ${activeTab === 'approved'
                 ? 'border-b-4 border-[#3847BB]'
                 : 'text-gray-500'
                 }`}
             >
-              Book
+              Approved
             </AppText>
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={() => setActiveTab('audio')}
+            onPress={() => setActiveTab('pending')}
             className="py-3"
           >
             <AppText
-              weight={activeTab === 'audio' ? 'semibold' : 'normal'}
-              className={`text-lg pb-1 ${activeTab === 'audio'
+              weight={activeTab === 'pending' ? 'semibold' : 'normal'}
+              className={`text-lg pb-1 ${activeTab === 'pending'
                 ? 'border-b-4 border-[#3847BB]'
                 : 'text-gray-500'
                 }`}
             >
-              Audio
+              Pending
             </AppText>
           </TouchableOpacity>
         </View>
 
         {/* List */}
-        <FlatList
+        {/* <FlatList
           data={filtered}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 20 }}
+        /> */}
+        <FlatList
+          contentContainerStyle={{ paddingBottom: 20 }}
+          data={filtered}
+          keyExtractor={item => item.id.toString()}
+          renderItem={renderItem}
+          // renderItem={({ item }) => renderPostCard(item)}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.1}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isFetching && !hasNextPage && !isLoading}
+              onRefresh={onRefresh}
+              colors={['#086AB8']}
+              tintColor="#086AB8"
+            />
+          }
+          ListFooterComponent={
+            isFetching && hasNextPage ? (
+              <View style={{ paddingVertical: 10 }}>
+                <ActivityIndicator size="large" color="#086AB8" />
+              </View>
+            ) : null
+          }
         />
       </View>
     </ScreenWrapper>

@@ -36,7 +36,7 @@ export const successColorCode = '#01E17B' as const;
 export const errorColorCode = '#F04349' as const;
 export const goldenColorCode = '#FFD700' as const;
 export const placeholderColor = 'color-[#D1D1D1]' as const;
-export const placeholderColorCode = '#D1D1D1' as const;
+export const placeholderColorCode = '#9F9F9F' as const;
 
 export const toastBgColorCode = '#2D3438' as const;
 export const toastBgColor = 'bg-[#2D3438]' as const;

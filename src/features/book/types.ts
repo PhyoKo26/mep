@@ -1,3 +1,5 @@
+import { Author } from "features/author/types";
+
 export type BookListsStackParamList = {
   BookListsScreen: { title: string };
   BookDetailScreen: { id: number | string };
@@ -8,11 +10,22 @@ export type BookListsStackParamList = {
 };
 
 export type Book = {
-  id: string;
-  image: any;
+  id: number;
+  cover_image: string;  // cover_image from API
   title: string;
-  author: string;
-  price: string;
+  author_name: string;  // Full author object
+  price: number;   // 8000 (number)
   description: string;
-  audioUrl: string;
+  pdf_url: string; // Renamed from audioUrl
+  audio_urls: string;
+  pages: number;
+  language: string;
+  download_count: number;
+  view_count: number;
+  rating: number;
+  published_year: string | null;
+  created_at: string;
+  category: string;
+  author: Author;
+  book_status: number;
 };

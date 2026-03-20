@@ -70,7 +70,7 @@ export function handleNotificationData(data: any) {
     case 'profile':
       const token = data.token;
       if (token) {
-        setToken(token, 'Bareers');
+        setToken(token, 'Bearer');
         NavigationService.navigate('AppStack', {
           screen: 'HomeStack',
           params: { screen: 'Profile' },
@@ -202,4 +202,48 @@ export const saveCaptureRefToDevice = async (viewRef: any) => {
   } catch (error: any) {
     Alert.alert('Failed', error.message);
   }
+};
+
+export const usePdfManager = () => {
+  const getPdfDir = (): string => {
+    return Platform.select({
+      ios: `${RNFS.DocumentDirectoryPath}/pdfs/`,
+      android: `${RNFS.ExternalDirectoryPath}/pdfs/`,
+    }) || `${RNFS.DocumentDirectoryPath}/pdfs/`;
+  };
+
+  const PDF_DIR = getPdfDir();
+
+  const ensurePdfDir = async () => {
+    await RNFS.mkdir(PDF_DIR);
+  };
+
+  const getPdfPath = (bookId: string): string => {  // ✅ Explicit string return
+    return `${PDF_DIR}${bookId}.pdf`;
+  };
+
+  const isPdfDownloaded = async (bookId: string): Promise<boolean> => {
+    await ensurePdfDir();
+    const path = getPdfPath(bookId);
+    const exists = await RNFS.exists(path);
+    return exists;
+  };
+
+  const downloadPdf = async (bookId: string, pdfUrl: string): Promise<string> => {
+    await ensurePdfDir();
+    const path = getPdfPath(bookId);
+
+    const downloadResult = await RNFS.downloadFile({
+      fromUrl: pdfUrl,
+      toFile: path,
+      background: true,
+    }).promise;
+
+    if (downloadResult.statusCode === 200) {
+      return path;
+    }
+    throw new Error('Download failed');
+  };
+
+  return { isPdfDownloaded, downloadPdf, getPdfPath };
 };

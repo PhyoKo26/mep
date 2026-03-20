@@ -14,6 +14,7 @@ interface HeaderProps {
   LeftIcon?: React.ReactNode;
   statusBarStyle?: 'light-content' | 'dark-content';
   RightIcon?: React.ReactNode;
+  iconColor?: string;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -24,6 +25,7 @@ const Header: React.FC<HeaderProps> = ({
   className,
   LeftIcon,
   RightIcon,
+  iconColor,
   statusBarStyle = 'dark-content',
 }) => {
   const insets = useSafeAreaInsets();
@@ -44,7 +46,7 @@ const Header: React.FC<HeaderProps> = ({
             accessibilityRole="button"
             accessibilityHint="Navigates to the previous screen"
           >
-            {LeftIcon || <ChevronLeft size={28} color="black" />}
+            {LeftIcon || <ChevronLeft size={28} color={iconColor || "black"} />}
           </TouchableOpacity>
         )}
         <AppText
@@ -55,7 +57,7 @@ const Header: React.FC<HeaderProps> = ({
         >
           {title}
         </AppText>
-        {RightIcon && RightIcon}
+        {RightIcon ? RightIcon : <View className='w-[28px]'></View>}
       </View>
     </View>
   );

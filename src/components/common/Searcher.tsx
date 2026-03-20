@@ -2,7 +2,7 @@ import { View, TextInput, Dimensions, TouchableOpacity } from 'react-native';
 import React, { memo, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from 'components';
-import { Search, X } from 'lucide-react-native';
+import { ArrowBigRightDash, Search, X } from 'lucide-react-native';
 import { useAppNavigate } from 'hooks';
 
 const { width: WIDTH } = Dimensions.get('window');
@@ -27,10 +27,18 @@ const SearchComponent = ({
         onSearch?.('');
     };
 
+    const goSearch = () => {
+        onSearch?.(searchQuery);
+        setSearchQuery('');
+        onSearch?.('');
+    };
+
     const handleSearch = (query: string) => {
         setSearchQuery(query);
-        onSearch?.(query);
+        // onSearch?.(query);
     };
+
+
 
     return (
         <View className="w-full">
@@ -38,7 +46,7 @@ const SearchComponent = ({
                 <Search size={20} color="#6B7280" className="mr-3" />
 
                 <TextInput
-                    className="flex-1 text-base text-gray-900 px-2"
+                    className="flex-1 text-base text-gray-900 px-4"
                     placeholder={placeholder}
                     placeholderTextColor="#9CA3AF"
                     value={searchQuery}
@@ -47,9 +55,14 @@ const SearchComponent = ({
                     returnKeyType="search"
                 />
 
-                {searchQuery.length > 0 && (
+                {/* {searchQuery.length > 0 && (
                     <TouchableOpacity onPress={clearSearch} className="p-1">
                         <X size={20} color="#9CA3AF" />
+                    </TouchableOpacity>
+                )} */}
+                {searchQuery.length > 0 && (
+                    <TouchableOpacity onPress={goSearch} className="p-1">
+                        <ArrowBigRightDash size={30} color="#3847BB" />
                     </TouchableOpacity>
                 )}
             </View>

@@ -23,47 +23,54 @@ const BookList = ({
 }: BookListProps) => {
     const { appNavigation } = useAppNavigate();
 
-    const renderBookCard = ({ item, index }: { item: Book; index: number }) => (
-        <TouchableOpacity
-            className={`${index === books.length - 1 ? '' : 'mr-4'}`}
-            onPress={() => onBookPress?.(item)}
-            style={{ width: CARD_WIDTH }}
-        >
-            <Image
-                source={{ uri: item.image }}
-                style={{ width: CARD_WIDTH, height: CARD_WIDTH * 1.4 }}
-                className="rounded-lg mb-2"
-                resizeMode="cover"
-            />
-            <AppText language='mm' weight='semibold' className="text-sm line-clamp-1">
-                {item.title}
-            </AppText>
-            <AppText className="text-xs mb-1">{item.author}</AppText>
-            <AppText weight='semibold' className="text-xs text-gray-600">
-                {item.price} Ks
-            </AppText>
-        </TouchableOpacity>
-    );
+    const renderBookCard = ({ item, index }: { item: Book; index: number }) => {
+
+        return (
+            <TouchableOpacity
+                className={`${index === books.length - 1 ? '' : 'mr-4'}`}
+                onPress={() => onBookPress?.(item)}
+                style={{ width: CARD_WIDTH }}
+            >
+                <Image
+                    source={{
+                        uri: item.cover_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.description)}&size=128&background=4F46E5&color=fff`
+                    }}
+                    style={{ width: CARD_WIDTH, height: CARD_WIDTH * 1.4 }}
+                    className="rounded-lg mb-2"
+                    resizeMode="cover"
+                />
+                <AppText language='mm' weight='semibold' className="text-sm line-clamp-1">
+                    {item.title}
+                </AppText>
+                <AppText className="text-xs mb-1">{item?.author_name}</AppText>
+                <AppText weight='semibold' className="text-xs text-gray-600">
+                    {item.price} Ks
+                </AppText>
+            </TouchableOpacity>
+        )
+    };
 
     return (
         <View className="w-full py-2">
             <View className="flex-row justify-between items-center mb-2">
-                <AppText weight='bold' className="text-xl text-gray-900">
+                <AppText weight='bold' className="w-4/5 text-lg text-gray-900">
                     {title}
                 </AppText>
-                <TouchableOpacity
-                    className="flex-row items-center"
-                    onPress={onSeeAllPress}
-                >
-                    <AppText className="text-sm text-secondary mt-1">See All</AppText>
-                    <ChevronRight size={16} color="#3847BB" />
-                </TouchableOpacity>
+                {onSeeAllPress &&
+                    <TouchableOpacity
+                        className="flex-row items-center"
+                        onPress={onSeeAllPress}
+                    >
+                        <AppText className="text-sm text-secondary mt-1">See All</AppText>
+                        <ChevronRight size={16} color="#3847BB" />
+                    </TouchableOpacity>
+                }
             </View>
 
             <FlatList
                 data={books}
                 renderItem={renderBookCard}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item) => item.id.toString()}
                 horizontal
                 showsHorizontalScrollIndicator={false}
             // contentContainerStyle={{ paddingRight: 20 }}

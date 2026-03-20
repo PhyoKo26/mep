@@ -1,107 +1,101 @@
 import { QueryFunctionContext, useInfiniteQuery, useMutation, useQuery, UseQueryOptions } from '@tanstack/react-query';
-import PostServices from 'api/services/postService';
-import UserServices from 'api/services/userServices';
-import Toast from 'react-native-toast-message';
+import AuthorServices from 'api/services/authorServices';
+import HomeServices from 'api/services/homeServices';
+import { useAuthStore } from 'store';
+import { showToast } from 'utils/helpers';
 import queryClient from 'utils/queryClient';
-import { ArticleQueryParams, GetMemberRequest, GetPostRequest } from 'types/api.request';
 
-// export const useGetUser = () => {
+// export const useGetHome = () => {
 //   return useQuery({
-//     queryKey: ['user-details'],
+//     queryKey: ['home-datas'],
 //     queryFn: UserServices.getUser,
 //   });
 // };
-export const useGetUser = (reqData: GetMemberRequest) => {
+
+export const useGetHome = () => {
+  const { token } = useAuthStore();
   return useQuery({
-    queryKey: ['user-details'],
+    queryKey: ['home-datas'],
     queryFn: async () => {
       try {
-        return await UserServices.getUser(reqData);
+        let resp = await HomeServices.getHome();
+        if (resp.success) {
+          const respData = resp.data;
+          return respData;
+        }
+        showToast(resp.success ? 'success' : 'error', resp.message || resp.error);
       } catch (err: any) {
         const error = err.response?.data || err;
-        Toast.show({
-          type: 'error',
-          text1: error.error,
-        });
+        showToast('error', error.error);
         throw err; // important to rethrow so React Query knows error state
       }
     },
-    enabled: !!reqData.device_id,
-  });
-};
-// export const useGetUser = () => {
-//   return useMutation({
-//     mutationFn: UserServices.getUser,
-//     onSuccess: () => {
-//       queryClient.invalidateQueries({ queryKey: ['user-details'] });
-//     },
-//     onError: (err: any) => {
-//       const error = err.response?.data || err;
-//       Toast.show({
-//         type: 'error',
-//         text1: error.error,
-//       });
-//     },
-//   });
-// };
-
-// export const useGetAllArticles = (params: ArticleQueryParams) => {
-//   return useQuery({
-//     queryKey: ['all-articles', params],
-//     queryFn: fetchArticlesWithParams,
-//     refetchOnWindowFocus: false,
-//     refetchOnReconnect: false,
-//   });
-// };
-export const useGetAllArticles = (params: ArticleQueryParams) => {
-  return useInfiniteQuery({
-    queryKey: ['all-articles', params.device_id, params.search, params.category],
-    queryFn: ({ pageParam = 1 }) => PostServices.getAllPosts({ ...params, page: pageParam, limit: params.limit }),
-    getNextPageParam: (lastPage: any) => {
-      const currentPage = lastPage.data.pagination.page;
-      const totalPages = lastPage.data.pagination.totalPages;
-      return currentPage < totalPages ? currentPage + 1 : undefined;
-    },
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    refetchOnMount: false,
-    staleTime: Infinity,
-    initialPageParam: 1,
-    enabled: !!params.device_id,
+    enabled: !!token,
   });
 };
 
-export const useGetArticleDetail = () => {
-  return useMutation({
-    mutationFn: ({ postId, reqData }: { postId: number | string; reqData: GetPostRequest }) =>
-      PostServices.getPostById(postId, reqData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['all-articles'] });
+export const useGetHomePromotions = () => {
+  const { token } = useAuthStore();
+  return useQuery({
+    queryKey: ['home-promotions'],
+    queryFn: async () => {
+      try {
+        let resp = await HomeServices.getHomePromotions();
+        if (resp.success) {
+          const respData = resp.data;
+          return respData;
+        }
+        showToast(resp.success ? 'success' : 'error', resp.message || resp.error);
+      } catch (err: any) {
+        const error = err.response?.data || err;
+        showToast('error', error.error);
+        throw err; // important to rethrow so React Query knows error state
+      }
     },
-    onError: (err: any) => {
-      const error = err.response?.data || err;
-      Toast.show({
-        type: 'error',
-        text1: error.error,
-      });
-    },
+    enabled: !!token,
   });
 };
-// export const useGetArticleDetail = () => {
-//   return useMutation(
-//     ({ postId, reqData }: { postId: string | number; reqData: GetPostRequest }) =>
-//       PostServices.getPostById(postId, reqData),
-//     {
-//       onSuccess: () => {
-//         queryClient.invalidateQueries({ queryKey: ['all-articles'] });
-//       },
-//       onError: (err: any) => {
-//         const error = err.response?.data || err;
-//         Toast.show({
-//           type: 'error',
-//           text1: error.error,
-//         });
-//       },
-//     }
-//   );
-// };
+
+export const useGetHomeAuthors = () => {
+  const { token } = useAuthStore();
+  return useQuery({
+    queryKey: ['home-authors'],
+    queryFn: async () => {
+      try {
+        let resp = await AuthorServices.getAllAuthors({});
+        if (resp.success) {
+          const respData = resp.data;
+          return respData;
+        }
+        showToast(resp.success ? 'success' : 'error', resp.message || resp.error);
+      } catch (err: any) {
+        const error = err.response?.data || err;
+        showToast('error', error.error);
+        throw err; // important to rethrow so React Query knows error state
+      }
+    },
+    enabled: !!token,
+  });
+};
+
+export const useGetAllBookGroups = () => {
+  const { token } = useAuthStore();
+  return useQuery({
+    queryKey: ['home-book-groups'],
+    queryFn: async () => {
+      try {
+        let resp = await HomeServices.getAllBookGroups();
+        if (resp.success) {
+          const respData = resp.data;
+          return respData;
+        }
+        showToast(resp.success ? 'success' : 'error', resp.message || resp.error);
+      } catch (err: any) {
+        const error = err.response?.data || err;
+        showToast('error', error.error);
+        throw err; // important to rethrow so React Query knows error state
+      }
+    },
+    enabled: !!token,
+  });
+};

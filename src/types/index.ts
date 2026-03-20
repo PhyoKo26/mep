@@ -1,19 +1,16 @@
 export interface IUser {
-  type: string;
-  id: number;
-  profile: string;
-  name: string | null;
+  auth_type: string;
+  user_id: string;
+  avatar: string | null;
+  name: string;
+  email: string;
   phone: string;
   password: string | null;
   otp: string;
-  role: 'User' | 'Admin';
   is_active: boolean;
   birthDate: string | null;
-  status: 'Single' | 'Married';
-  weight: string | null;
   Township: string | null;
   Division: string | null;
-  familyPlan: 'AvoidPregnant' | 'Conceiving';
   createdAt: string;
   updatedAt: string;
   isNotified: boolean;

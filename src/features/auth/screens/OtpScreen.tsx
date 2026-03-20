@@ -23,13 +23,10 @@ const OtpScreen = () => {
   const { fcmToken, setIsAuthenticated, setToken } = useAuthStore();
   const deviceInfo = useDeviceInfo();
 
-  const { useVerifyOtp } = useAuth();
-
-  const { mutate: handleVerifyOTP, isPending } = useVerifyOtp;
   const { transId, loginPhone, loginData } = useAuthStore();
 
   const onSubmit = methods.handleSubmit((data) => {
-    setToken('abab', 'Bareers');
+    setToken('abab', 'Bearer');
     setIsAuthenticated(true);
   });
 
@@ -55,8 +52,8 @@ const OtpScreen = () => {
               gradientClassName="h-12"
               onPress={onSubmit}
               style={{ width: WIDTH / 1.1, alignSelf: 'center' }}
-              isLoading={isPending}
-              disabled={isPending}
+              // isLoading={isPending}
+              // disabled={isPending}
               variant={'outline'}
               outlineColor={'#FFFFFF'}
             >

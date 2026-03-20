@@ -4,7 +4,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from 'components';
 import { ChevronLeft } from 'lucide-react-native';
 import { useAppNavigate } from 'hooks';
-import { LogoIcon } from 'assets/svg';
 const logoSrc = require('../../../assets/images/homelogo.png');
 
 type HomeHeaderProps = {

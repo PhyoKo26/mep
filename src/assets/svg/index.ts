@@ -1,7 +1,6 @@
 export { default as LogoutIcon } from './setting/logout.svg';
 export { default as RegisterIcon } from './setting/register.svg';
 
-export { default as LogoIcon } from './common/home_logo.svg';
 export { default as AlertIcon } from './common/alert.svg';
 export { default as MyanmarIcon } from './common/myanmar.svg';
 export { default as ChevronDownIcon } from './common/chevron-down.svg';

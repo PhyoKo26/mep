@@ -50,7 +50,7 @@ const FormInputLogin: React.FC<FormInputLoginProps> = ({
             <View className={cn(
               'flex-row items-center border rounded-2xl',
               error ? errorBorderColor : 'border-[#fff]',
-              'min-h-14'
+              'min-h-14 bg-white'
             )}>
               {/* Left Icon with Separator */}
               {leftIcon && (
@@ -69,10 +69,10 @@ const FormInputLogin: React.FC<FormInputLoginProps> = ({
               {/* Input Field */}
               <TextInput
                 className={cn(
-                  'flex-1 h-full pr-3 text-white',
+                  'flex-1 h-full pr-3 text-black',
                   Platform.OS === 'android' ? 'py-5' : 'py-0'
                 )}
-                style={{ fontFamily: 'Poppins-Regular', textAlign: 'center' }}
+                style={{ fontFamily: 'Poppins-Regular', paddingLeft: 16 }}
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
