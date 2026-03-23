@@ -1,4 +1,4 @@
-package com.mep
+package com.pixoralab.mep
 
 import android.app.Application
 import com.facebook.react.PackageList

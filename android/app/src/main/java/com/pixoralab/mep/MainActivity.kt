@@ -1,4 +1,4 @@
-package com.mep
+package com.pixoralab.mep
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
