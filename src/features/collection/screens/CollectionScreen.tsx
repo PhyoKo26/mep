@@ -1,11 +1,13 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { View, TouchableOpacity, FlatList, Image, RefreshControl, ActivityIndicator } from 'react-native';
-import { ScreenWrapper, Header, AppText } from 'components';
+import { ScreenWrapper, Header, AppText, LinearButton } from 'components';
 import bookData from 'features/home/data/bookData';
 import { Book } from 'features/book/types';
 import { useAppNavigate } from 'hooks';
 import { useGetMyCollections } from '../hooks/useCollection';
 import queryClient from 'utils/queryClient';
+import { usePdfManager } from 'utils/helpers';
+import { BookOpenText } from 'lucide-react-native';
 
 const MyCollectionScreen = () => {
   const { appNavigation } = useAppNavigate();
@@ -41,36 +43,145 @@ const MyCollectionScreen = () => {
     }
   };
 
-  let filtered: any = [];
-  if (activeTab == 'approved') {
-    filtered = myApproved;
-  } else {
-    filtered = myPending;
-  }
+  const filtered = useMemo(() => {
+    return activeTab === 'approved' ? myApproved : myPending;
+  }, [activeTab, myApproved, myPending]);
+
+  const { isPdfDownloaded, downloadPdf, getPdfPath } = usePdfManager();
+  const [isPdfReady, setIsPdfReady] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  const checkPdfStatus = useCallback(async (BOOK: Book) => {
+    if (BOOK?.id) {
+      const exists = await isPdfDownloaded(BOOK.id.toString());
+      if (exists) {
+        const localPath = getPdfPath(BOOK.id.toString());
+        appNavigation.navigate('BookStack', { screen: 'BookReadScreen', params: { title: BOOK.title, bookURL: localPath } });
+      } else {
+        appNavigation.navigate('BookStack', { screen: 'BookDetailScreen', params: { id: BOOK.id } })
+        // handleReadPress(BOOK);
+      }
+    }
+  }, [isPdfDownloaded]);
+
+  const handleReadPress = async (BOOK: Book) => {
+    if (!BOOK?.id || !BOOK?.pdf_url) return;
+
+    if (!isPdfReady) {
+      setIsDownloading(true);
+      try {
+        // ✅ Fixed: downloadPdf (not pdfManager.downloadPdf)
+        const localPath = await downloadPdf(BOOK.id.toString(), BOOK.pdf_url, (progress) => {
+          setProgress(progress);
+        });
+        setIsPdfReady(true);
+        appNavigation.navigate('BookReadScreen', {
+          title: BOOK.title,
+          bookURL: localPath
+        });
+      } catch (error) {
+        console.error('Download failed:', error);
+      } finally {
+        setIsDownloading(false);
+      }
+    } else {
+      // ✅ Fixed: getPdfPath (not pdfManager.getPdfPath)
+      const localPath = getPdfPath(BOOK.id.toString());  // Only needs bookId
+      appNavigation.navigate('BookReadScreen', {
+        title: BOOK.title,
+        bookURL: localPath
+      });
+    }
+  };
+
+  const [downloadStatus, setDownloadStatus] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    if (activeTab !== 'approved') return; // ✅ skip for pending
+
+    let isMounted = true;
+
+    const checkAllBooks = async () => {
+      const results = await Promise.all(
+        filtered.map(async (book) => {
+          if (!book.id) return [null, false];
+
+          try {
+            const exists = await isPdfDownloaded(book.id.toString());
+            return [book.id.toString(), exists];
+          } catch {
+            return [book.id.toString(), false];
+          }
+        })
+      );
+
+      const newStatuses: Record<string, boolean> = {};
+
+      results.forEach(([id, status]) => {
+        if (id) newStatuses[id] = status;
+      });
+
+      if (isMounted) {
+        setDownloadStatus((prev) =>
+          JSON.stringify(prev) === JSON.stringify(newStatuses)
+            ? prev
+            : newStatuses
+        );
+      }
+    };
+
+    if (filtered.length > 0) {
+      checkAllBooks();
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [filtered, activeTab]);
 
   const renderItem = ({ item }: { item: Book }) => {
     const progressPercent = Number((Math.random()).toFixed(2));
+    const isDownloaded = downloadStatus[item.id?.toString()] || false;
 
     return (
       <TouchableOpacity
-        className="flex-row p-4 bg-white rounded-2xl mb-3 shadow-sm"
+        className="flex-row px-4 py-6 border-b border-gray-200"
+        disabled
         onPress={() => appNavigation.navigate('BookStack', { screen: 'BookDetailScreen', params: { id: item.id } })}
       >
         {/* Left image */}
         <Image
           source={{ uri: item.cover_image }}
-          className="w-[70px] h-[100px] rounded-lg bg-gray-200"
+          className="w-[100px] h-[130px] rounded-lg bg-gray-200"
           resizeMode="cover"
         />
 
         {/* Right content */}
         <View className="flex-1 ml-3 justify-center">
-          <AppText weight="medium" language='mm' className="text-base mb-1">
+          <AppText weight="medium" language='mm' className="text-base text-primary mb-1 line-clamp-2">
             {item.title}
           </AppText>
-          <AppText className="text-sm text-gray-600 mb-3">
+          <AppText weight="medium" className="text-sm text-gray-600 mb-3 line-clamp-1">
             {item.author.name}
           </AppText>
+          <View className='flex-row'>
+            {activeTab === 'approved' &&
+              <LinearButton
+                onPress={() => checkPdfStatus(item)}
+                style={{ width: 80, minHeight: 32, height: 30, alignSelf: 'center', borderRadius: 8 }}
+              >
+                <AppText weight='bold' className="text-xs text-white">{isDownloaded ? 'Read' : 'Download'}</AppText>
+              </LinearButton>
+            }
+            <LinearButton
+              variant='outline'
+              onPress={() => appNavigation.navigate('BookStack', { screen: 'BookDetailScreen', params: { id: item.id } })}
+              style={{ width: 80, minHeight: 32, height: 30, alignSelf: 'center', borderRadius: 8, marginLeft: 10 }}
+            >
+              <AppText weight='bold' className="text-xs text-primary">Detail</AppText>
+            </LinearButton>
+          </View>
 
           {/* Progress row */}
           {/* <View className="flex-row justify-between items-center">
@@ -89,42 +200,61 @@ const MyCollectionScreen = () => {
     );
   };
 
+  const emptyBook = () => (
+    <View className="flex-1 justify-center items-center pt-[30%] px-6">
+      <View className="w-24 h-24 bg-blue-100 rounded-3xl items-center justify-center">
+        <BookOpenText size={56} color="#6366F1" strokeWidth={2} />
+      </View>
+
+      <AppText className="text-center mt-6 text-lg font-semibold">
+        No Books Found
+      </AppText>
+
+      <AppText className="text-center mt-3 text-gray-500">
+        {isLoading
+          ? 'Loading books...'
+          : `No books available`}
+      </AppText>
+    </View>
+  );
+
   return (
     <ScreenWrapper
       header={<Header title="My Collection" showBackButton={false} />}
       isScrollable={false}
       isShowLoadingModal={isLoading}
+      hidePaddingBottom
     >
-      <View className="flex-1 px-4 pt-4">
+      <View className="flex-1 px-4">
         {/* Tabs at top-left - Fixed Tailwind */}
-        <View className="flex-row">
+        <View className="flex-row bg-black/5 rounded-full my-3">
           <TouchableOpacity
             onPress={() => setActiveTab('approved')}
-            className="px-4 py-3 mr-6"
+            className="w-1/2"
           >
             <AppText
               weight={activeTab === 'approved' ? 'semibold' : 'normal'}
-              className={`text-lg pb-1 ${activeTab === 'approved'
-                ? 'border-b-4 border-[#3847BB]'
+              className={`text-base text-center p-2 rounded-full ${activeTab === 'approved'
+                ? 'bg-primary text-white'
                 : 'text-gray-500'
                 }`}
             >
-              Approved
+              My Book
             </AppText>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => setActiveTab('pending')}
-            className="py-3"
+            className="w-1/2"
           >
             <AppText
               weight={activeTab === 'pending' ? 'semibold' : 'normal'}
-              className={`text-lg pb-1 ${activeTab === 'pending'
-                ? 'border-b-4 border-[#3847BB]'
+              className={`text-base text-center p-2 rounded-full ${activeTab === 'pending'
+                ? 'bg-primary text-white'
                 : 'text-gray-500'
                 }`}
             >
-              Pending
+              Payment Pending
             </AppText>
           </TouchableOpacity>
         </View>
@@ -146,6 +276,7 @@ const MyCollectionScreen = () => {
           onEndReached={loadMore}
           onEndReachedThreshold={0.1}
           showsVerticalScrollIndicator={false}
+          ListEmptyComponent={emptyBook}
           refreshControl={
             <RefreshControl
               refreshing={isFetching && !hasNextPage && !isLoading}

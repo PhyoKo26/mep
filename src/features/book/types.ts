@@ -1,7 +1,7 @@
 import { Author } from "features/author/types";
 
 export type BookListsStackParamList = {
-  BookListsScreen: { title: string };
+  BookListsScreen: { title: string, searchKey?: string };
   BookDetailScreen: { id: number | string };
   BookBuyScreen: { bookDetail: string };
   BookReadScreen: { title: string, bookURL: string };
@@ -28,4 +28,5 @@ export type Book = {
   category: string;
   author: Author;
   book_status: number;
+  sample_url: string;
 };

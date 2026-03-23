@@ -7,6 +7,7 @@ import BookBuyScreen from './screens/BookBuyScreen';
 import BookReadScreen from './screens/BookReadScreen';
 import BookPlaylistScreen from './screens/BookPlaylistScreen';
 import BookPlayScreen from './screens/BookPlayScreen';
+import BooksTabScreen from './screens/BooksTabScreen';
 
 const BookStack = createStackNavigator<BookListsStackParamList>();
 
@@ -18,6 +19,7 @@ export default function BookNavigator() {
         ...TransitionPresets.SlideFromRightIOS,
       }}
     >
+      <BookStack.Screen name="BooksTabScreen" component={BooksTabScreen} />
       <BookStack.Screen name="BookListsScreen" component={BookListsScreen} />
       <BookStack.Screen name="BookDetailScreen" component={BookDetailScreen} />
       <BookStack.Screen name="BookBuyScreen" component={BookBuyScreen} />

@@ -4,9 +4,12 @@ import { createBottomTabNavigator, TransitionPresets } from '@react-navigation/b
 import { HomeStackParamList } from './types';
 import HomeScreen from './screens/HomeScreen';
 import AuthorScreen from './../author/AuthorNavigator';
+import BookScreen from './../book/BookNavigator';
 import CollectionScreen from './../collection/CollectionNavigator';
 import ProfileScreen from './../profile/ProfileNavigator';
 import {
+  BookCopy,
+  BookMarked,
   Feather,
   House,
   LibraryBig,
@@ -20,8 +23,8 @@ const Tab = createBottomTabNavigator<HomeStackParamList>();
 
 const tabsConfig = [
   { name: 'Home', component: HomeScreen, icon: House, label: 'Home' },
-  { name: 'Author', component: AuthorScreen, icon: Feather, label: 'Author' },
-  { name: 'My Collection', component: CollectionScreen, icon: LibraryBig, label: 'My Collection' },
+  { name: 'Book', component: BookScreen, icon: BookMarked, label: 'Book' },
+  { name: 'My Collection', component: CollectionScreen, icon: BookCopy, label: 'My Collection' },
   { name: 'Profile', component: ProfileScreen, icon: UserRound, label: 'Profile' },
 ];
 
@@ -37,9 +40,9 @@ const HomeNavigator = () => {
         ...TransitionPresets.FadeFromBottomAndroid,
         // tabBarShowLabel: true,
         tabBarStyle: {
-          width: '95%',
-          // height: 100,
-          marginBottom: 10 + insets.bottom,
+          // width: '95%',
+          height: 73 + insets.bottom,
+          // marginBottom: insets.bottom,
           alignSelf: 'center',
           alignItems: 'center',
           backgroundColor: '#fff',

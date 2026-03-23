@@ -215,34 +215,78 @@ export const usePdfManager = () => {
   const PDF_DIR = getPdfDir();
 
   const ensurePdfDir = async () => {
-    await RNFS.mkdir(PDF_DIR);
+    const exists = await RNFS.exists(PDF_DIR);
+    console.log('[PDF] dir:', PDF_DIR, 'exists:', exists);
+
+    if (!exists) {
+      await RNFS.mkdir(PDF_DIR);
+      console.log('[PDF] dir created');
+    }
   };
 
-  const getPdfPath = (bookId: string): string => {  // ✅ Explicit string return
+  const getPdfPath = (bookId: string): string => {
     return `${PDF_DIR}${bookId}.pdf`;
   };
 
   const isPdfDownloaded = async (bookId: string): Promise<boolean> => {
-    await ensurePdfDir();
-    const path = getPdfPath(bookId);
-    const exists = await RNFS.exists(path);
-    return exists;
+    try {
+      await ensurePdfDir();
+      const path = getPdfPath(bookId);
+      const exists = await RNFS.exists(path);
+      console.log('[PDF] exists:', path, exists);
+      return exists;
+    } catch (error) {
+      console.log('[PDF] isPdfDownloaded error:', error);
+      return false;
+    }
   };
 
-  const downloadPdf = async (bookId: string, pdfUrl: string): Promise<string> => {
-    await ensurePdfDir();
-    const path = getPdfPath(bookId);
+  // ✅ New signature: onProgress callback receives percentage (0-100)
+  const downloadPdf = async (
+    bookId: string,
+    pdfUrl: string,
+    onProgress?: (progress: number) => void  // ✅ Progress callback
+  ): Promise<string> => {
+    try {
+      console.log('[PDF] Raw URL:', pdfUrl);
 
-    const downloadResult = await RNFS.downloadFile({
-      fromUrl: pdfUrl,
-      toFile: path,
-      background: true,
-    }).promise;
+      const encodedUrl = encodeURI(pdfUrl);
+      console.log('[PDF] Encoded URL:', encodedUrl);
 
-    if (downloadResult.statusCode === 200) {
-      return path;
+      await ensurePdfDir();
+      const path = getPdfPath(bookId);
+      console.log('[PDF] Target path:', path);
+
+      const result = await RNFS.downloadFile({
+        fromUrl: encodedUrl,
+        toFile: path,
+        background: true,
+        progress: (res) => {
+          // ✅ Calculate percentage (0-100)
+          const total = res.contentLength || 0;
+          const percent = total > 0 ? Math.round((res.bytesWritten / total) * 100) : 0;
+
+          // ✅ Call your callback with percentage
+          onProgress?.(percent);
+          console.log(`[PDF ${bookId}] ${percent}%`);
+        },
+      }).promise;
+
+      console.log('[PDF] Download result:', result);
+
+      if (result.statusCode === 200) {
+        const exists = await RNFS.exists(path);
+        console.log('[PDF] File exists:', exists);
+        onProgress?.(100); // ✅ Final 100%
+        return path;
+      }
+
+      throw new Error(`Download failed: ${result.statusCode}`);
+    } catch (error) {
+      console.log('[PDF] FULL ERROR:', error);
+      onProgress?.(0); // ✅ Reset on error
+      throw error;
     }
-    throw new Error('Download failed');
   };
 
   return { isPdfDownloaded, downloadPdf, getPdfPath };

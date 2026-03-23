@@ -42,7 +42,7 @@ const BookList = ({
                 <AppText language='mm' weight='semibold' className="text-sm line-clamp-1">
                     {item.title}
                 </AppText>
-                <AppText className="text-xs mb-1">{item?.author_name}</AppText>
+                <AppText className="text-xs mb-1 line-clamp-1">{item?.author_name}</AppText>
                 <AppText weight='semibold' className="text-xs text-gray-600">
                     {item.price} Ks
                 </AppText>

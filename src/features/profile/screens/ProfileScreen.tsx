@@ -13,6 +13,7 @@ import { NavigationService } from 'navigation/NavigationService';
 import { cn } from 'utils/helpers';
 import { useGetUser } from '../hooks/useProfile';
 
+const logoSrc = require('../../../assets/images/logo.png');
 const { width: WIDTH } = Dimensions.get('window');
 const isIOS = Platform.OS === 'ios';
 
@@ -112,14 +113,14 @@ const ProfileScreen = () => {
           title={"Profile"}
           onBackPress={appNavigation.goBack}
           showBackButton={false}
-          // RightIcon={
-          //   <TouchableOpacity onPress={onSubmit} className='bg-secondary rounded-full'>
-          //     <AppText weight="medium" className="mx-3 text-white">
-          //       {!edit && <Pencil size={11} color="white" />}
-          //       {edit ? 'Done' : ' Edit'}
-          //     </AppText>
-          //   </TouchableOpacity>
-          // }
+        // RightIcon={
+        //   <TouchableOpacity onPress={onSubmit} className='bg-secondary rounded-full'>
+        //     <AppText weight="medium" className="mx-3 text-white">
+        //       {!edit && <Pencil size={11} color="white" />}
+        //       {edit ? 'Done' : ' Edit'}
+        //     </AppText>
+        //   </TouchableOpacity>
+        // }
         />
       }
     // isShowLoadingModal={isLoading}
@@ -154,8 +155,11 @@ const ProfileScreen = () => {
               source={{ uri: 'https://image.tmdb.org/t/p/w500/9MOY95jds58WtvEwUTYZgXlTVr0.jpg' }}
               className="w-24 h-24 rounded-full"
             /> */}
-            <CircleUserRound size={100} color="#3847BB" />
-            <AppText weight='semibold' className="text-lg mt-3">ID: {`${profileData?.user_id}`}</AppText>
+            {/* <CircleUserRound size={100} color="#02107D" /> */}
+            <View className='bg-primary p-4 rounded-full border-4 border-secondary'>
+              <Image source={logoSrc} style={{ width: 100, height: 100 }} resizeMode="contain" />
+            </View>
+            <AppText weight='semibold' className="text-lg mt-3 text-primary">ID: {`${profileData?.user_id}`}</AppText>
           </View>
 
           {/* {fields.map(({ Icon, value, setter, placeholder, keyboardType }, i) => (
@@ -171,9 +175,11 @@ const ProfileScreen = () => {
             </View>
           ))} */}
           {fields.map(({ Icon, key, placeholder, keyboardType }, i) => (
-            <View key={i} className="flex-row items-center justify-between py-4">
-              <View className="flex-row items-center flex-1">
-                <Icon size={20} />
+            <View key={i} className="flex-row items-center justify-between py-4 bg-gray-100 m-1 rounded-xl">
+              <View className="flex-row items-center flex-1 px-4">
+                <View className='bg-white p-3 rounded-xl'>
+                  <Icon size={25} color='#02107D' />
+                </View>
                 {edit ? (
                   <TextInput
                     className="w-5/6 ml-7 px-5 text-base border border-gray-300 rounded-xl"
@@ -183,9 +189,14 @@ const ProfileScreen = () => {
                     keyboardType={keyboardType as any}
                   />
                 ) : (
-                  <AppText className="ml-5 mt-1 text-base">
-                    {profileData[key] || placeholder}
-                  </AppText>
+                  <View>
+                    <AppText weight='semibold' className="ml-5 uppercase text-xs text-gray-400">
+                      {key}
+                    </AppText>
+                    <AppText weight='semibold' className="ml-5 text-lg text-primary">
+                      {profileData[key] || placeholder}
+                    </AppText>
+                  </View>
                 )}
               </View>
             </View>
@@ -199,13 +210,13 @@ const ProfileScreen = () => {
             <ChevronRight size={30} />
           </TouchableOpacity> */}
 
-          <View className="px-4 mt-5 self-center">
+          <View className="w-full mt-5 self-center">
             {options.map(({ Icon, label, onPress }, index) => (
               <TouchableOpacity
                 key={index}
                 onPress={onPress}
                 className={cn(
-                  'flex-row items-center bg-white rounded-2xl p-4 my-2 mx-3 px-10',
+                  'flex-row items-center justify-center bg-white rounded-2xl p-4 my-2 px-10',
                   'shadow-sm border border-gray-200'
                 )}
                 style={{
@@ -216,11 +227,12 @@ const ProfileScreen = () => {
                   shadowOffset: { width: 0, height: 3 },
                   // Android elevation
                   elevation: 4,
+                  backgroundColor: '#ef4444'
                 }}
               >
                 <View className="flex-row items-center">
-                  <Icon />
-                  <AppText className={cn('ml-5')}>{label}</AppText>
+                  <Icon color='white' />
+                  <AppText weight='semibold' className={cn('ml-5 text-lg text-white')}>{label}</AppText>
                 </View>
               </TouchableOpacity>
             ))}

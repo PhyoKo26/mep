@@ -6,6 +6,7 @@ import { ChevronLeft } from 'lucide-react-native';
 import { useAppNavigate } from 'hooks';
 
 const { width: WIDTH, height: HEIGHT } = Dimensions.get('window');
+const CARD_WIDTH = WIDTH - 43; // Fixed card width for proper snapping
 
 type BannerItem = {
   id: number;
@@ -43,7 +44,7 @@ const HomeBanner = ({ items }: HomeBannerProps) => {
             viewPosition: 0.5,
           });
         }
-      }, 3000); // Change slide every 3 seconds
+      }, 3000);
     }
 
     return () => {
@@ -81,40 +82,33 @@ const HomeBanner = ({ items }: HomeBannerProps) => {
     minimumViewTime: 300,
   };
 
-  const renderItem = ({ item, index }: { item: BannerItem; index: number }) => {
-    // console.log(`Rendering item ${index}:`, item);
-
+  const renderItem = ({ item }: { item: BannerItem }) => {
     return (
-      <View style={{ width: WIDTH - 48 }}>
+      <View style={{ width: CARD_WIDTH }}>
         <TouchableOpacity
           activeOpacity={0.9}
           className="flex-1"
+          style={{ flex: 1 }} // Ensure touchable fills the container
           onPress={() => {
             console.log('Tapped:', item.image);
             if (item.link_type === 'book') {
-              appNavigation.navigate('BookStack', { screen: 'BookDetailScreen', params: { id: item.link_id } })
-              // appNavigation.navigate('BookDetail', { id: item.link_id });
+              appNavigation.navigate('BookStack', {
+                screen: 'BookDetailScreen',
+                params: { id: item.link_id }
+              });
             }
           }}
         >
           <Image
             source={{ uri: item.image }}
             style={{
-              width: WIDTH - 48,
-              height: HEIGHT / 2.2,
+              width: '100%',
+              aspectRatio: 16 / 9.95, // Adjust ratio as needed (16:9 banner ratio)
               borderRadius: 10,
-              // backgroundColor: '#f0f0f0',
+              // backgroundColor: '#f2f2f2', // Fallback background
             }}
             resizeMode="contain"
           />
-          {/* <View className="mt-3 px-6 pb-4">
-            <AppText className="text-primary text-lg font-bold mb-1" numberOfLines={2}>
-              {item.title}
-            </AppText>
-            <AppText className="text-primary/80 text-sm" numberOfLines={2}>
-              {item.subtitle}
-            </AppText>
-          </View> */}
         </TouchableOpacity>
       </View>
     );
@@ -144,7 +138,7 @@ const HomeBanner = ({ items }: HomeBannerProps) => {
   }
 
   return (
-    <View className="flex items-center mb-8">
+    <View className="flex items-center">
       <FlatList
         ref={flatListRef}
         data={items}
@@ -152,19 +146,20 @@ const HomeBanner = ({ items }: HomeBannerProps) => {
         keyExtractor={(item) => item.id.toString()}
         horizontal
         showsHorizontalScrollIndicator={false}
-        snapToInterval={WIDTH - 48}  // ✅ Keep this
-        snapToAlignment="start"     // ✅ Changed from "center"
+        snapToInterval={CARD_WIDTH}
+        snapToAlignment="start"
         decelerationRate="fast"
         viewabilityConfig={viewabilityConfig}
         onViewableItemsChanged={handleViewableItemsChanged}
         onScrollBeginDrag={handleScrollBeginDrag}
         onMomentumScrollEnd={handleScrollEndDrag}
         getItemLayout={(_, index) => ({
-          length: WIDTH - 48,           // ✅ Exact item width
-          offset: (WIDTH - 48) * index, // ✅ Exact positioning
+          length: CARD_WIDTH,
+          offset: CARD_WIDTH * index,
           index,
         })}
-      // contentContainerStyle={{ paddingHorizontal: 24 }}  // ✅ Add padding
+        // contentContainerStyle={{ paddingHorizontal: 24 }}
+        pagingEnabled={false}
       />
       {renderIndicator()}
     </View>

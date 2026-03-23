@@ -164,9 +164,9 @@ const BookPlayScreen = () => {
                             value={position}
                             onSlidingComplete={seekTo}
                             step={1}  // Snap to seconds
-                            minimumTrackTintColor="#3847BB"
+                            minimumTrackTintColor="#FFB800"
                             maximumTrackTintColor="#CFCFCF"
-                            thumbTintColor="#3847BB"
+                            thumbTintColor="#FFB800"
                         />
 
                         {/* <CustomSlider
@@ -197,9 +197,9 @@ const BookPlayScreen = () => {
                                 onPress={togglePlayPause}
                             >
                                 {isPlaying ? (
-                                    <PauseCircle size={80} color="#3847BB" />
+                                    <PauseCircle size={80} color="#FFB800" />
                                 ) : (
-                                    <PlayCircle size={80} color="#3847BB" />
+                                    <PlayCircle size={80} color="#FFB800" />
                                 )}
                             </TouchableOpacity>
 

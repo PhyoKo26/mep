@@ -14,38 +14,44 @@ const PDF_URL = 'https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pld
 const BookReadScreen = () => {
     const { appNavigation } = useAppNavigate();
     const route = useRoute();
-    const { title, bookURL } = route.params || {};
+    const { title, bookURL, sampleURL } = route.params || {};
 
     const pdfRef = useRef<any>(null);
 
     const [localPath, setLocalPath] = useState<string | null>(null);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
-    const [loading, setLoading] = useState(true);
+    const [pdfLoading, setPdfLoading] = useState(true);
 
-    // useEffect(() => {
-    //     downloadPdf();
-    // }, []);
+    useEffect(() => {
+        if (bookURL) {
+            setLocalPath(bookURL);
+        } else if (sampleURL) {
+            downloadPdf();
+        }
+    }, [bookURL, sampleURL]);
 
-    // const downloadPdf = async () => {
-    //     console.log(bookURL);
-        
-    //     try {
-    //         const { fs } = RNBlobUtil;
-    //         const path = `${fs.dirs.CacheDir}/book.pdf`;
+    const downloadPdf = async (url?: string) => {
+        const downloadUrl = url || sampleURL; // Use passed URL or fallback
+        if (!downloadUrl) return;
 
-    //         const res = await RNBlobUtil.config({
-    //             path,
-    //             fileCache: true,
-    //         }).fetch('GET', bookURL);
+        console.log('Downloading:', downloadUrl);
 
-    //         setLocalPath(`file://${res.path()}`);
-    //     } catch (err) {
-    //         console.error(err);
-    //         Alert.alert('Error', 'Failed to download PDF');
-    //         setLoading(false);
-    //     }
-    // };
+        try {
+            const { fs } = RNBlobUtil;
+            const path = `${fs.dirs.CacheDir}/book_${Date.now()}.pdf`; // Unique filename
+
+            const res = await RNBlobUtil.config({
+                path,
+                fileCache: true,
+            }).fetch('GET', downloadUrl);
+
+            setLocalPath(`file://${res.path()}`);
+        } catch (err) {
+            console.error('Download error:', err);
+            Alert.alert('Error', 'Failed to download PDF');
+        }
+    };
     // const downloadPdf = async () => {
     //     try {
     //         const { fs } = RNBlobUtil;
@@ -96,26 +102,30 @@ const BookReadScreen = () => {
     return (
         <ScreenWrapper
             header={<Header title={title} onBackPress={appNavigation.goBack} />}
-            isShowLoadingModal={!bookURL}
+            isShowLoadingModal={pdfLoading}
         >
             <View className="flex-1 bg-white">
-                {!bookURL ? (
+                {!localPath ? (
                     // <ActivityIndicator size="large" style={{ marginTop: '100%' }} />
                     <></>
                 ) : (
                     <Pdf
                         ref={pdfRef}
-                        source={{ uri: bookURL, cache: true }}
+                        source={{ uri: localPath, cache: true }}
                         enablePaging
-                        // page={page}
+                        onLoadProgress={(percent) => {
+                            // ✅ 0 = starting, 100 = fully loaded
+                            setPdfLoading(percent < 100);
+                            console.log('PDF loading:', percent + '%');
+                        }}
                         onLoadComplete={(pages) => {
                             setTotalPages(pages);
-                            setLoading(false);
+                            setPdfLoading(false); // ✅ Fully loaded
                         }}
                         onPageChanged={(p) => setPage(p)}
                         onError={(e) => {
                             console.log('PDF Error:', e);
-                            setLoading(false);
+                            setPdfLoading(false);
                         }}
                         style={{ flex: 1 }}
                     />

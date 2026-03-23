@@ -17,3 +17,11 @@ export interface VerifyUserResponse extends BasicResponse {
 export interface GenerateOtpResponse extends BasicResponse {
   trans_id: string;
 }
+
+export interface NormalizedResponse {
+  data: any[];
+  pagination: {
+    page: number;
+    totalPages: number;
+  };
+};

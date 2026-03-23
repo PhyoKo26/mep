@@ -51,7 +51,7 @@ const LinearButton: React.FC<LinearButtonProps> = ({
               minHeight: 56,
               justifyContent: 'center',
               borderRadius: 16,
-              borderWidth: 1,
+              borderWidth: 2,
               borderColor: disabled ? '#A0A0A0' : outlineColor,
               backgroundColor: 'transparent',
               opacity: disabled ? 0.6 : 1,

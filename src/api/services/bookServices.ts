@@ -12,6 +12,10 @@ const BookServices = {
     const response = await apiClient.post(API_ENDPOINTS.get_books_by_search, reqBody);
     return response.data;
   },
+  getAllBooks: async (reqBody: any) => {
+    const response = await apiClient.post(API_ENDPOINTS.get_books_by_search, reqBody);
+    return response.data;
+  },
   getBookDetail: async (reqBody: any) => {
     const response = await apiClient.post(API_ENDPOINTS.get_book_detail, reqBody);
     return response.data;

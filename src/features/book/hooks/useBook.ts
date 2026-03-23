@@ -5,6 +5,8 @@ import UserServices from 'api/services/userServices';
 import { useAppNavigate } from 'hooks';
 import Toast from 'react-native-toast-message';
 import { useAuthStore } from 'store';
+import { BookQueryParams } from 'types/api.request';
+import { NormalizedResponse } from 'types/api.response';
 import { showToast } from 'utils/helpers';
 import queryClient from 'utils/queryClient';
 
@@ -24,73 +26,131 @@ import queryClient from 'utils/queryClient';
 //     },
 //   });
 // };
-export const useGetBookByGroupId = (params: any) => {
+export const useGetBookByGroupId = (params: BookQueryParams) => {
   const { token } = useAuthStore();
-  return useInfiniteQuery({
-    queryKey: ['booksByGroup', params.list_id],
-    queryFn: ({ pageParam = 1 }) => BookServices.getBookByGroupId({ ...params, page: pageParam, limit: params.limit }),
-    getNextPageParam: (lastPage: any) => {
-      const currentPage = lastPage.pagination.page;
-      const totalPages = lastPage.pagination.totalPages;
-      return currentPage < totalPages ? currentPage + 1 : undefined;
+
+  return useInfiniteQuery<NormalizedResponse>({
+    queryKey: ['booksByGroup', params.list_id, token],
+    queryFn: async ({ pageParam = 1 }) => {
+      const res = await BookServices.getBookByGroupId({
+        ...params,
+        page: pageParam,
+      });
+
+      return {
+        data: res.data?.books || res.data || [],
+        pagination: {
+          page: res.pagination?.page ?? res.data?.pagination?.page ?? 1,
+          totalPages:
+            res.pagination?.totalPages ??
+            res.data?.pagination?.totalPages ??
+            1,
+        },
+      };
     },
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: true,
-    refetchOnMount: false,
-    staleTime: 5 * 60 * 1000,
+    getNextPageParam: (lastPage) => {
+      const { page, totalPages } = lastPage.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
+    enabled: Boolean(params.list_id),
     initialPageParam: 1,
-    enabled: !!params.list_id,
+    staleTime: 5 * 60 * 1000,
   });
 };
 
-// export const useGetBookByAuthorId = () => {
-//   return useMutation({
-//     mutationFn: AuthorServices.getBookByAuthorId,
-//     onError: (err: any) => {
-//       const error = err.response?.data || err;
-//       showToast('error', error.error);
-//     },
-//   });
-// };
-export const useGetBookByAuthorId = (params: any) => {
+export const useGetBookByAuthorId = (params: BookQueryParams) => {
   const { token } = useAuthStore();
-  return useInfiniteQuery({
-    queryKey: ['booksByAuthor', params.id],
-    queryFn: ({ pageParam = 1 }) => AuthorServices.getBookByAuthorId({
-      ...params, page: pageParam, limit: params.limit
-    }),
-    getNextPageParam: (lastPage: any) => {
-      const currentPage = lastPage.data.pagination.page;
-      const totalPages = lastPage.data.pagination.totalPages;
-      return currentPage < totalPages ? currentPage + 1 : undefined;
+
+  return useInfiniteQuery<NormalizedResponse>({
+    queryKey: ['booksByAuthor', params.id, token],
+    queryFn: async ({ pageParam = 1 }) => {
+      const res = await AuthorServices.getBookByAuthorId({
+        ...params,
+        page: pageParam,
+      });
+
+      return {
+        data: res.data?.books || res.data || [],
+        pagination: {
+          page: res.pagination?.page ?? res.data?.pagination?.page ?? 1,
+          totalPages:
+            res.pagination?.totalPages ??
+            res.data?.pagination?.totalPages ??
+            1,
+        },
+      };
     },
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: true,
-    refetchOnMount: false,
-    staleTime: 5 * 60 * 1000,
+    getNextPageParam: (lastPage) => {
+      const { page, totalPages } = lastPage.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
+    enabled: Boolean(params.id),
     initialPageParam: 1,
-    enabled: !!params.id,
+    staleTime: 5 * 60 * 1000,
   });
 };
 
-export const useGetBookBySearchKey = (params: any) => {
+export const useGetBookBySearchKey = (params: BookQueryParams) => {
   const { token } = useAuthStore();
-  return useInfiniteQuery({
-    queryKey: ['booksBySearch', params.search],
-    queryFn: ({ pageParam = 1 }) => BookServices.getBookBySearchKey({
-      ...params, page: pageParam, limit: params.limit
-    }),
-    getNextPageParam: (lastPage: any) => {
-      const currentPage = lastPage.pagination.page;
-      const totalPages = lastPage.pagination.totalPages;
-      return currentPage < totalPages ? currentPage + 1 : undefined;
+
+  return useInfiniteQuery<NormalizedResponse>({
+    queryKey: ['booksBySearch', params.search, token],
+    queryFn: async ({ pageParam = 1 }) => {
+      const res = await BookServices.getBookBySearchKey({
+        ...params,
+        page: pageParam,
+      });
+
+      return {
+        data: res.data?.books || res.data || [],
+        pagination: {
+          page: res.pagination?.page ?? res.data?.pagination?.page ?? 1,
+          totalPages:
+            res.pagination?.totalPages ??
+            res.data?.pagination?.totalPages ??
+            1,
+        },
+      };
     },
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: true,
-    refetchOnMount: false,
-    staleTime: 5 * 60 * 1000,
+    getNextPageParam: (lastPage) => {
+      const { page, totalPages } = lastPage.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
+    enabled: Boolean(params.search),
     initialPageParam: 1,
-    enabled: !!params.search,
+    staleTime: 5 * 60 * 1000,
+  });
+};
+
+export const useGetAllBook = (params: BookQueryParams) => {
+  const { token } = useAuthStore();
+
+  return useInfiniteQuery<NormalizedResponse>({
+    queryKey: ['book-lists', token],
+    queryFn: async ({ pageParam = 1 }) => {
+      const res = await BookServices.getAllBooks({
+        ...params,
+        page: pageParam,
+      });
+
+      return {
+        data: res.data?.books || res.data || [],
+        pagination: {
+          page: res.pagination?.page ?? res.data?.pagination?.page ?? 1,
+          totalPages:
+            res.pagination?.totalPages ??
+            res.data?.pagination?.totalPages ??
+            1,
+        },
+      };
+    },
+    getNextPageParam: (lastPage) => {
+      const { page, totalPages } = lastPage.pagination;
+      return page < totalPages ? page + 1 : undefined;
+    },
+    enabled: !params.search && !params.id && !params.list_id,
+    initialPageParam: 1,
+    staleTime: 5 * 60 * 1000,
   });
 };
 

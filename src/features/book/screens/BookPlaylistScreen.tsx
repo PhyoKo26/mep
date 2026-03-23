@@ -65,14 +65,14 @@ const BookPlaylistScreen = () => {
             className="flex-row items-center px-6 py-4 border-b border-gray-200"
             onPress={() => handlePlayTrack(item)}
           >
-            <View className="w-12 h-12 bg-secondary rounded-lg mr-4 justify-center items-center">
-              <AppText className="text-white font-bold">▶</AppText>
+            <View className="w-12 h-12 bg-yellow-500 rounded-lg mr-4 justify-center items-center">
+              <AppText className="text-white text-xl font-bold">▶</AppText>
             </View>
             <View className="flex-1">
               <AppText weight="medium">{item.name}</AppText>
               <AppText className="text-sm text-gray-500">{item.url.split('/').pop()}</AppText>
             </View>
-            <PlayCircle size={24} color="#3847BB" />
+            <PlayCircle size={24} color="#FFB800" />
           </TouchableOpacity>
         )}
         keyExtractor={(item: any) => item.url}

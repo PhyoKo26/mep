@@ -36,7 +36,7 @@ const AuthorList = ({
                     className="w-28 h-32 rounded-3xl mb-2"
                     resizeMode="cover"
                 />
-                <AppText language='mm' className="w-28 text-xs text-center line-clamp-3">
+                <AppText language='mm' className="w-28 text-xs text-center line-clamp-1">
                     {item.name}
                 </AppText>
             </TouchableOpacity>

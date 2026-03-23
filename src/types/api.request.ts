@@ -19,3 +19,9 @@ export interface CreateUserRequest {
 export interface VerifyUserRequest {
   phone: string;
 }
+export interface BookQueryParams {
+  list_id?: number;
+  id?: number;
+  search?: string;
+  limit: number;
+};

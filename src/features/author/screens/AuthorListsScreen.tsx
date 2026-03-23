@@ -12,7 +12,7 @@ import queryClient from 'utils/queryClient';
 const { width: WIDTH } = Dimensions.get('window');
 const isIOS = Platform.OS === 'ios';
 
-const AuthorListsScreen = () => {
+const AuthorListsScreen = ({ hideHeader }: any) => {
   const { appNavigation } = useAppNavigate();
 
   const pageLimit = 20;
@@ -44,46 +44,56 @@ const AuthorListsScreen = () => {
     }
   };
 
-  // const renderAuthorCard = ({ item, index }: { item: Author; index: number }) => (
-  //   <TouchableOpacity
-  //     className={`mb-4`}
-  //     onPress={() => console.log(item)}
-  //     style={{ width: '30%' }}
-  //   >
-  //     <Image
-  //       source={{ uri: item.image }}
-  //       className="w-full h-44 rounded-3xl mb-2"
-  //       resizeMode="cover"
-  //     />
-  //     <AppText language='mm' className="text-sm line-clamp-1">
-  //       {item.name}
-  //     </AppText>
-  //   </TouchableOpacity>
-  // );
   const renderAuthorCard = ({ item, index }: { item: Author; index: number }) => (
     <TouchableOpacity
-      className="mb-4"
+      className={`flex-row px-6 py-4 my-2 rounded-xl bg-black/10`}
       onPress={() => appNavigation.navigate('BookStack', { screen: 'BookListsScreen', params: { title: item.name, authorId: item.id } })}
-      style={{
-        width: '30%',
-        left: index % 3 === 0 ? 0 : index % 3 === 1 ? '5%' : '10%',
-      }}
+    // style={{ width: '30%' }}
     >
       <Image
         source={{
           uri: item.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.name)}&size=128&background=4F46E5&color=fff`
         }}
-        className="w-28 h-32 rounded-3xl mb-2"
-        resizeMode="cover"
+        className="w-20 h-20 rounded-full bg-white"
+        resizeMode="contain"
       />
-      <AppText language='mm' className="w-3/4 text-xs text-center line-clamp-3">
-        {item.name}
-      </AppText>
+      <View className='ml-4 justify-center'>
+        <AppText language='mm' weight='semibold' className="text-lg line-clamp-1">
+          {item.name}
+        </AppText>
+        <AppText className="line-clamp-1">
+          {item.total_books} {item.total_books === 1 ? 'Book' : 'Books'} Available
+        </AppText>
+      </View>
     </TouchableOpacity>
   );
+  // const renderAuthorCard = ({ item, index }: { item: Author; index: number }) => (
+  //   <TouchableOpacity
+  //     className="mb-4"
+  //     onPress={() => appNavigation.navigate('BookStack', { screen: 'BookListsScreen', params: { title: item.name, authorId: item.id } })}
+  //     style={{
+  //       width: '30%',
+  //       left: index % 3 === 0 ? 0 : index % 3 === 1 ? '5%' : '10%',
+  //     }}
+  //   >
+  //     <Image
+  //       source={{
+  //         uri: item.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.name)}&size=128&background=4F46E5&color=fff`
+  //       }}
+  //       className="w-28 h-32 rounded-3xl mb-2"
+  //       resizeMode="cover"
+  //     />
+  //     <AppText language='mm' className="w-3/4 text-xs text-center line-clamp-3">
+  //       {item.name}
+  //     </AppText>
+  //   </TouchableOpacity>
+  // );
 
   return (
-    <ScreenWrapper header={<Header title={"Author"} showBackButton={false} />} isShowLoadingModal={isLoading}>
+    <ScreenWrapper
+      header={!hideHeader && <Header title={"Author"} onBackPress={appNavigation.goBack} />}
+      isShowLoadingModal={isLoading} hidePaddingBottom={hideHeader}
+    >
       <View className="pt-4 px-6">
         <FlatList
           contentContainerStyle={{ flexGrow: 1 }}
@@ -94,7 +104,7 @@ const AuthorListsScreen = () => {
           //   gap: 12,
           // }}
           data={authors}
-          numColumns={3}
+          // numColumns={3}
           keyExtractor={item => item.id.toString()}
           renderItem={renderAuthorCard}
           // renderItem={({ item }) => renderPostCard(item)}

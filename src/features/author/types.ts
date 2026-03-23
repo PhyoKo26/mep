@@ -6,4 +6,5 @@ export type Author = {
   id: number;
   name: string;
   avatar: string | null;
+  total_books: number;
 };

@@ -50,11 +50,12 @@ const BookDetailScreen = () => {
   const { isPdfDownloaded, downloadPdf, getPdfPath } = usePdfManager();
   const [isPdfReady, setIsPdfReady] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const checkPdfStatus = useCallback(async () => {
     if (BOOK?.id) {
       const exists = await isPdfDownloaded(BOOK.id.toString());
-      setIsPdfReady(exists);
+      (progress === 0 || progress === 100) && setIsPdfReady(exists);
     }
   }, [BOOK?.id, isPdfDownloaded]);
 
@@ -65,7 +66,9 @@ const BookDetailScreen = () => {
       setIsDownloading(true);
       try {
         // ✅ Fixed: downloadPdf (not pdfManager.downloadPdf)
-        const localPath = await downloadPdf(BOOK.id.toString(), BOOK.pdf_url);
+        const localPath = await downloadPdf(BOOK.id.toString(), BOOK.pdf_url, (progress) => {
+          setProgress(progress);
+        });
         setIsPdfReady(true);
         appNavigation.navigate('BookReadScreen', {
           title: BOOK.title,
@@ -90,10 +93,9 @@ const BookDetailScreen = () => {
     checkPdfStatus();
   }, [BOOK?.id, checkPdfStatus]);  // ✅ Added checkPdfStatus to deps
 
-
   return (
     <ScreenWrapper
-      header={<Header title={BOOK?.title} onBackPress={appNavigation.goBack} />}
+      header={<Header title={`Book Detail`} onBackPress={appNavigation.goBack} />}
       isScrollable
       isShowLoadingModal={isAnyPending}
     >
@@ -112,40 +114,67 @@ const BookDetailScreen = () => {
             </View>
 
             <View className="items-center mb-8">
-              <AppText language='mm' weight='bold' className="text-xl text-center mb-2">
+              <AppText language='mm' weight='bold' className="text-xl text-primary text-center mb-2">
                 {BOOK?.title}
               </AppText>
-              <AppText language='mm' className="mb-1">Author - {BOOK?.author.name}</AppText>
+              <AppText language='mm' weight='semibold' className="text-lg text-black/50 mb-1">Author - {BOOK?.author.name}</AppText>
               <AppText language='mm' weight='bold' className="text-2xl">{BOOK?.price} Ks</AppText>
             </View>
 
-            {BOOK?.book_status == 3 &&
-              <LinearButton
-                gradientClassName="h-12"
-                onPress={() => appNavigation.navigate('BookBuyScreen', { bookDetail: BOOK })}
-                style={{ width: WIDTH / 1.1, alignSelf: 'center' }}
-              // isLoading={isPending}
-              // disabled={isPending}
-              >
-                Buy Now
-              </LinearButton>
-            }
+            <View className='border-y-2 border-gray-200 py-6'>
+              {BOOK?.book_status == 3 &&
+                <View className="flex-row justify-between">
+                  {BOOK?.sample_url &&
+                    <LinearButton
+                      gradientClassName="h-12"
+                      onPress={() => appNavigation.navigate('BookReadScreen', {
+                        title: BOOK.title,
+                        sampleURL: BOOK?.sample_url
+                      })}
+                      style={{ width: WIDTH / 2.3, alignSelf: 'center' }}
+                      // isLoading={isPending}
+                      // disabled={isPending}
+                      colors={['#FFCC00', '#FFB800']}
+                      variant='outline'
+                      outlineColor='#FFCC00'
+                    >
+                      <AppText weight='bold' className="text-primary">
+                        Read Sample
+                      </AppText>
+                    </LinearButton>
+                  }
+                  <LinearButton
+                    gradientClassName="h-12"
+                    onPress={() => appNavigation.navigate('BookBuyScreen', { bookDetail: BOOK })}
+                    style={{ width: WIDTH / (BOOK?.sample_url ? 2.3 : 1.1), alignSelf: 'center' }}
+                    // isLoading={isPending}
+                    // disabled={isPending}
+                    colors={['#FFCC00', '#FFB800']}
+                  >
+                    <AppText weight='bold' className="text-primary">
+                      Buy Now
+                    </AppText>
+                  </LinearButton>
+                </View>
+              }
 
-            {BOOK?.book_status == 2 &&
-              <LinearButton
-                gradientClassName="h-24"
-                // onPress={() => appNavigation.navigate('BookBuyScreen', { bookDetail: BOOK })}
-                style={{ width: WIDTH / 1.1, alignSelf: 'center' }}
-              // isLoading={isPending}
-              // disabled={isPending}
-              >
-                {`ငွေပေးချေမှု ပြုလုပ်ပြီး။\nAdmin approve ပြုလုပ်ပြီးနောက် ဖတ်ရှုနိုင်မည်။`}
-              </LinearButton>
-            }
+              {BOOK?.book_status == 2 &&
+                <LinearButton
+                  gradientClassName="h-24"
+                  // onPress={() => appNavigation.navigate('BookBuyScreen', { bookDetail: BOOK })}
+                  style={{ width: WIDTH / 1.1, alignSelf: 'center' }}
+                  // isLoading={isPending}
+                  // disabled={isPending}
+                  colors={['#FFCC00', '#FFB800']}
+                  textClassName='text-primary'
+                >
+                  {`ငွေပေးချေမှု ပြုလုပ်ပြီး။\nAdmin approve ပြုလုပ်ပြီးနောက် ဖတ်ရှုနိုင်မည်။`}
+                </LinearButton>
+              }
 
-            {BOOK?.book_status == 1 &&
-              <View className="flex-row justify-between my-6">
-                {/* <LinearButton
+              {BOOK?.book_status == 1 &&
+                <View className="flex-row justify-between">
+                  {/* <LinearButton
                   gradientClassName="h-12"
                   onPress={() => appNavigation.navigate('BookReadScreen', { title: BOOK?.title, bookURL: BOOK?.pdf_url })}
                   style={{ width: WIDTH / 2.3, alignSelf: 'center' }}
@@ -157,42 +186,46 @@ const BookDetailScreen = () => {
                     <AppText language='mm' weight='bold' className="text-base ml-3 text-white">Read Book</AppText>
                   </View>
                 </LinearButton> */}
-                <LinearButton
-                  gradientClassName="h-12"
-                  onPress={handleReadPress}
-                  // isLoading={isDownloading}
-                  disabled={!BOOK?.pdf_url || isDownloading}
-                  style={{ width: WIDTH / 2.3, alignSelf: 'center' }}
-                >
-                  <View className='flex-row items-center'>
-                    {isPdfReady ? (
-                      <BookOpenText size={30} color="#FFFFFF" />
-                    ) : (
-                      <Download size={30} color="#FFFFFF" />
-                    )}
-                    <AppText language='mm' weight='bold' className="text-base ml-3 text-white">
-                      {isPdfReady ? 'Read Book' : isDownloading ? 'Downloading...' : 'Download & Read'}
-                    </AppText>
-                  </View>
-                </LinearButton>
-                <LinearButton
-                  gradientClassName="h-12"
-                  onPress={() => appNavigation.navigate('BookPlaylistScreen', { bookDetail: BOOK })}
-                  style={{ width: WIDTH / 2.3, alignSelf: 'center' }}
-                  // isLoading={isPending}
-                  disabled={!BOOK?.audio_urls}
-                >
-                  <View className='flex-row'>
-                    <Headphones size={30} color="#FFFFFF" />
-                    <AppText language='mm' weight='bold' className="text-base ml-3 text-white">Play Book</AppText>
-                  </View>
-                </LinearButton>
-              </View>
-            }
-
+                  <LinearButton
+                    gradientClassName="h-12"
+                    onPress={handleReadPress}
+                    // isLoading={isDownloading}
+                    disabled={!BOOK?.pdf_url || isDownloading}
+                    style={{ width: WIDTH / 2.3, alignSelf: 'center' }}
+                    colors={['#FFCC00', '#FFB800']}
+                    variant='outline'
+                    outlineColor='#FFCC00'
+                  >
+                    <View className='flex-row items-center'>
+                      {isPdfReady ? (
+                        <BookOpenText size={30} color="#02107D" />
+                      ) : (
+                        !isDownloading && <Download size={30} color="#02107D" />
+                      )}
+                      <AppText language='mm' weight='bold' className="text-base ml-3 text-primary">
+                        {isPdfReady ? 'Read Book' : isDownloading ? `${progress}% Downloading...` : 'Download & Read'}
+                      </AppText>
+                    </View>
+                  </LinearButton>
+                  <LinearButton
+                    gradientClassName="h-12"
+                    onPress={() => appNavigation.navigate('BookPlaylistScreen', { bookDetail: BOOK })}
+                    style={{ width: WIDTH / 2.3, alignSelf: 'center' }}
+                    // isLoading={isPending}
+                    disabled={BOOK?.audio_urls?.length == 0}
+                    colors={['#FFCC00', '#FFB800']}
+                  >
+                    <View className='flex-row'>
+                      <Headphones size={30} color="#02107D" />
+                      <AppText language='mm' weight='bold' className="text-base ml-3 text-primary">Play Book</AppText>
+                    </View>
+                  </LinearButton>
+                </View>
+              }
+            </View>
             {/* Description */}
             <View className='mt-6'>
-              <AppText weight='medium' className="text-lg text-gray-900 mb-2">Description</AppText>
+              <AppText weight='semibold' className="text-lg text-primary mb-2">Book Description</AppText>
               <AppText language='mm' className="text-sm text-gray-600 leading-5 mb-3">
                 {truncatedDesc}
               </AppText>
@@ -208,7 +241,7 @@ const BookDetailScreen = () => {
           </View>
 
           {relatedBooks?.length > 0 &&
-            <View className='px-6 bg-secondary/10'>
+            <View className='px-6 py-2'>
               <BookList
                 title="Related Book"
                 books={relatedBooks}
@@ -219,7 +252,7 @@ const BookDetailScreen = () => {
           }
         </View>
       }
-    </ScreenWrapper>
+    </ScreenWrapper >
   );
 };
 
