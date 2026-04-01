@@ -4,7 +4,6 @@ import Pdf from 'react-native-pdf';
 import RNBlobUtil from 'react-native-blob-util';
 import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { useRoute } from '@react-navigation/native';
-
 import { AppText, Header, ScreenWrapper } from 'components';
 import { useAppNavigate } from 'hooks';
 
@@ -14,7 +13,7 @@ const PDF_URL = 'https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pld
 const BookReadScreen = () => {
     const { appNavigation } = useAppNavigate();
     const route = useRoute();
-    const { title, bookURL, sampleURL } = route.params || {};
+    const { title, bookURL, sampleURL, password } = route.params || {};
 
     const pdfRef = useRef<any>(null);
 
@@ -112,7 +111,9 @@ const BookReadScreen = () => {
                     <Pdf
                         ref={pdfRef}
                         source={{ uri: localPath, cache: true }}
+                        password={password}
                         enablePaging
+                        horizontal={true}
                         onLoadProgress={(percent) => {
                             // ✅ 0 = starting, 100 = fully loaded
                             setPdfLoading(percent < 100);

@@ -8,7 +8,9 @@ import { BookOpen, BookOpenText, ChevronRight, Download, Headphones, Play } from
 import { Book } from '../types';
 import BookList from 'components/common/BookList';
 import { useGetAllBookRelated, useGetBookDetail } from '../hooks/useBook';
-import { usePdfManager } from 'utils/helpers';
+import { decryptPdfPassword, usePdfManager } from 'utils/helpers';
+import { useAuthStore } from 'store';
+import RNFS from 'react-native-fs';
 
 const { width: WIDTH } = Dimensions.get('window');
 const isIOS = Platform.OS === 'ios';
@@ -18,6 +20,7 @@ const BookDetailScreen = () => {
   const route = useRoute();
   const bookID = route.params?.id;
   // const BOOK: Book | any = bookData.find(({ id }) => id == bookID);
+  const { token } = useAuthStore();
 
   const { mutate: handleGetBookDetail, data: dataDetail, isPending: isDetailPending, isSuccess } = useGetBookDetail();
   const { mutate: handleGetAllBookRelated, data: dataRelated, isPending: isRelatedPending } = useGetAllBookRelated();
@@ -31,6 +34,9 @@ const BookDetailScreen = () => {
   const truncatedDesc = showFullDescription
     ? BOOK?.description
     : BOOK?.description?.split('\n').slice(0, 2).join('\n') + '...';
+
+  // const BookPwd = decryptPdfPassword(BOOK?.pwd);
+  // console.log('📤 SEND THIS TO BACKEND:', BookPwd);
 
   // useEffect(() => {
   //   handleGetBookDetail({ id: bookID });
@@ -52,12 +58,75 @@ const BookDetailScreen = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [progress, setProgress] = useState(0);
 
+  // const checkPdfStatus = useCallback(async () => {
+  //   if (BOOK?.id) {
+  //     checkPdfReady(BOOK?.id)
+  //   }
+  // }, [BOOK?.id, isPdfDownloaded, progress]);
+
+  // const getExpectedSize = async (url: string): Promise<number> => {
+  //   try {
+  //     const response = await fetch(url, { method: 'HEAD' });
+  //     return parseInt(response.headers.get('content-length') || '0', 10);
+  //   } catch {
+  //     return 0;  // Fallback to header check only
+  //   }
+  // };
+  // const checkPdfReady = async (bookId: number): Promise<boolean> => {
+  //   const path = getPdfPath(bookId.toString());
+  //   try {
+  //     const expectedSize = await getExpectedSize(`${BOOK.pdf_url}&token=${token}`);
+  //     console.log('Expected size:', expectedSize);
+
+  //     // ✅ Get LOCAL file size
+  //     const exists = await RNFS.exists(path);
+  //     console.log(exists, path);
+
+  //     if (!exists) return false;
+
+  //     const stat = await RNFS.stat(path);
+  //     const localSize = stat.size;  // ✅ Local file size in bytes
+  //     console.log('Local file size:', localSize);
+
+
+  //     if (expectedSize > 0) {
+  //       if (localSize !== expectedSize) {
+  //         setIsPdfReady(false)
+
+  //       } else {
+  //         setIsPdfReady(true)
+
+  //       }
+  //     }
+
+  //     return true;
+  //   } catch (error) {
+  //     console.error('checkPdfReady error:', error);
+  //     return false;
+  //   }
+  // };
+
   const checkPdfStatus = useCallback(async () => {
-    if (BOOK?.id) {
-      const exists = await isPdfDownloaded(BOOK.id.toString());
-      (progress === 0 || progress === 100) && setIsPdfReady(exists);
+    if (!BOOK?.id) return;
+
+    try {
+      const path = getPdfPath(BOOK.id.toString());
+      const response = await fetch(`${BOOK.pdf_url}&token=${token}`, { method: 'HEAD' });
+      const expectedSize = parseInt(response.headers.get('content-length') || '0', 10);
+
+      const exists = await RNFS.exists(path);
+      if (!exists) {
+        setIsPdfReady(false);
+        return;
+      }
+
+      const { size } = await RNFS.stat(path);
+      setIsPdfReady(expectedSize === 0 || parseInt(size.toString(), 10) === expectedSize);
+    } catch (err) {
+      console.error('PDF check error:', err);
+      setIsPdfReady(false);
     }
-  }, [BOOK?.id, isPdfDownloaded]);
+  }, [BOOK?.id, token]);
 
   const handleReadPress = async () => {
     if (!BOOK?.id || !BOOK?.pdf_url) return;
@@ -72,7 +141,8 @@ const BookDetailScreen = () => {
         setIsPdfReady(true);
         appNavigation.navigate('BookReadScreen', {
           title: BOOK.title,
-          bookURL: localPath
+          bookURL: localPath,
+          password: decryptPdfPassword(BOOK?.pwd)
         });
       } catch (error) {
         console.error('Download failed:', error);
@@ -84,7 +154,8 @@ const BookDetailScreen = () => {
       const localPath = getPdfPath(BOOK.id.toString());  // Only needs bookId
       appNavigation.navigate('BookReadScreen', {
         title: BOOK.title,
-        bookURL: localPath
+        bookURL: localPath,
+        password: decryptPdfPassword(BOOK?.pwd)
       });
     }
   };
@@ -129,7 +200,8 @@ const BookDetailScreen = () => {
                       gradientClassName="h-12"
                       onPress={() => appNavigation.navigate('BookReadScreen', {
                         title: BOOK.title,
-                        sampleURL: BOOK?.sample_url
+                        sampleURL: BOOK?.sample_url,
+                        password: decryptPdfPassword(BOOK?.pwd)
                       })}
                       style={{ width: WIDTH / 2.3, alignSelf: 'center' }}
                       // isLoading={isPending}
@@ -191,10 +263,11 @@ const BookDetailScreen = () => {
                     onPress={handleReadPress}
                     // isLoading={isDownloading}
                     disabled={!BOOK?.pdf_url || isDownloading}
-                    style={{ width: WIDTH / 2.3, alignSelf: 'center' }}
+                    // style={{ width: WIDTH / 2.3, alignSelf: 'center' }}
+                    style={{ width: WIDTH / (BOOK?.audios?.length != 0 ? 2.3 : 1.1), alignSelf: 'center' }}
                     colors={['#FFCC00', '#FFB800']}
-                    variant='outline'
-                    outlineColor='#FFCC00'
+                    variant={BOOK?.audios?.length != 0 ? 'outline' : 'solid'}
+                    outlineColor={BOOK?.audios?.length != 0 ? '#FFCC00' : '#FFF'}
                   >
                     <View className='flex-row items-center'>
                       {isPdfReady ? (
@@ -203,24 +276,32 @@ const BookDetailScreen = () => {
                         !isDownloading && <Download size={30} color="#02107D" />
                       )}
                       <AppText language='mm' weight='bold' className="text-base ml-3 text-primary">
-                        {isPdfReady ? 'Read Book' : isDownloading ? `${progress}% Downloading...` : 'Download & Read'}
+                        {isPdfReady ? 'Read Book' : isDownloading ? `${progress}% Downloading...` : 'Download'}
                       </AppText>
                     </View>
                   </LinearButton>
-                  <LinearButton
-                    gradientClassName="h-12"
-                    onPress={() => appNavigation.navigate('BookPlaylistScreen', { bookDetail: BOOK })}
-                    style={{ width: WIDTH / 2.3, alignSelf: 'center' }}
-                    // isLoading={isPending}
-                    disabled={BOOK?.audio_urls?.length == 0}
-                    colors={['#FFCC00', '#FFB800']}
-                  >
-                    <View className='flex-row'>
-                      <Headphones size={30} color="#02107D" />
-                      <AppText language='mm' weight='bold' className="text-base ml-3 text-primary">Play Book</AppText>
-                    </View>
-                  </LinearButton>
+                  {BOOK?.audios?.length != 0 &&
+                    <LinearButton
+                      gradientClassName="h-12"
+                      onPress={() => appNavigation.navigate('BookPlaylistScreen', { bookDetail: BOOK })}
+                      style={{ width: WIDTH / 2.3, alignSelf: 'center' }}
+                      // isLoading={isPending}
+                      disabled={BOOK?.audios?.length == 0}
+                      colors={['#FFCC00', '#FFB800']}
+                    >
+                      <View className='flex-row'>
+                        <Headphones size={30} color="#02107D" />
+                        <AppText language='mm' weight='bold' className="text-base ml-3 text-primary">Play Book</AppText>
+                      </View>
+                    </LinearButton>
+                  }
                 </View>
+              }
+
+              {isDownloading &&
+                <AppText language='mm' weight='bold' className="text-lg text-center text-red-700 mt-4">
+                  {`Download လုပ်နေချိန် ခေတ္တစောင့်ပေးပါ`}
+                </AppText>
               }
             </View>
             {/* Description */}

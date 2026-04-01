@@ -6,12 +6,15 @@ import { Book } from 'features/book/types';
 import { useAppNavigate } from 'hooks';
 import { useGetMyCollections } from '../hooks/useCollection';
 import queryClient from 'utils/queryClient';
-import { usePdfManager } from 'utils/helpers';
+import { decryptPdfPassword, usePdfManager } from 'utils/helpers';
 import { BookOpenText } from 'lucide-react-native';
+import { useAuthStore } from 'store';
+import RNFS from 'react-native-fs';
 
 const MyCollectionScreen = () => {
   const { appNavigation } = useAppNavigate();
   const [activeTab, setActiveTab] = useState<'approved' | 'pending'>('approved');
+  const { token } = useAuthStore();
 
   const pageLimit = 10;
   const {
@@ -52,18 +55,47 @@ const MyCollectionScreen = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [progress, setProgress] = useState(0);
 
+  // const checkPdfStatus = useCallback(async (BOOK: Book) => {
+  //   if (BOOK?.id) {
+  //     const exists = await isPdfDownloaded(BOOK.id.toString());
+  //     if (exists) {
+  //       const localPath = getPdfPath(BOOK.id.toString());
+  //       appNavigation.navigate('BookStack', { screen: 'BookReadScreen', params: { title: BOOK.title, bookURL: localPath } });
+  //     } else {
+  //       appNavigation.navigate('BookStack', { screen: 'BookDetailScreen', params: { id: BOOK.id } })
+  //       // handleReadPress(BOOK);
+  //     }
+  //   }
+  // }, [isPdfDownloaded]);
+
   const checkPdfStatus = useCallback(async (BOOK: Book) => {
-    if (BOOK?.id) {
-      const exists = await isPdfDownloaded(BOOK.id.toString());
+    if (!BOOK?.id) return;
+
+    try {
+      const path = getPdfPath(BOOK.id.toString());
+      const response = await fetch(`${BOOK.pdf_url}&token=${token}`, { method: 'HEAD' });
+      const expectedSize = parseInt(response.headers.get('content-length') || '0', 10);
+
+      const exists = await RNFS.exists(path);
       if (exists) {
-        const localPath = getPdfPath(BOOK.id.toString());
-        appNavigation.navigate('BookStack', { screen: 'BookReadScreen', params: { title: BOOK.title, bookURL: localPath } });
+        const { size } = await RNFS.stat(path);
+        // setIsPdfReady(expectedSize === 0 || parseInt(size.toString(), 10) === expectedSize);
+        if (expectedSize === 0 || parseInt(size.toString(), 10) === expectedSize) {
+          const localPath = getPdfPath(BOOK.id.toString());
+          appNavigation.navigate('BookStack', { screen: 'BookReadScreen', params: { title: BOOK.title, bookURL: localPath, password: decryptPdfPassword(BOOK?.pwd) } });
+        } else {
+          appNavigation.navigate('BookStack', { screen: 'BookDetailScreen', params: { id: BOOK.id } })
+          // handleReadPress(BOOK);
+        }
       } else {
         appNavigation.navigate('BookStack', { screen: 'BookDetailScreen', params: { id: BOOK.id } })
         // handleReadPress(BOOK);
       }
+    } catch (err) {
+      console.error('PDF check error:', err);
+      setIsPdfReady(false);
     }
-  }, [isPdfDownloaded]);
+  }, [token]);
 
   const handleReadPress = async (BOOK: Book) => {
     if (!BOOK?.id || !BOOK?.pdf_url) return;
@@ -78,7 +110,8 @@ const MyCollectionScreen = () => {
         setIsPdfReady(true);
         appNavigation.navigate('BookReadScreen', {
           title: BOOK.title,
-          bookURL: localPath
+          bookURL: localPath,
+          password: decryptPdfPassword(BOOK?.pwd)
         });
       } catch (error) {
         console.error('Download failed:', error);
@@ -90,7 +123,8 @@ const MyCollectionScreen = () => {
       const localPath = getPdfPath(BOOK.id.toString());  // Only needs bookId
       appNavigation.navigate('BookReadScreen', {
         title: BOOK.title,
-        bookURL: localPath
+        bookURL: localPath,
+        password: decryptPdfPassword(BOOK?.pwd)
       });
     }
   };

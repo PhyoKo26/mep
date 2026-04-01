@@ -6,6 +6,7 @@ import { useRoute } from '@react-navigation/native';
 import { PlayCircle } from 'lucide-react-native';
 import { Book } from '../types';
 import BookList from 'components/common/BookList';
+import { useAuthStore } from 'store';
 
 const { width: WIDTH } = Dimensions.get('window');
 const isIOS = Platform.OS === 'ios';
@@ -14,7 +15,8 @@ const BookPlaylistScreen = () => {
   const { appNavigation } = useAppNavigate();
   const route = useRoute();
   const { bookDetail } = route.params || {};
-  const { title, cover_image, author, audio_urls } = bookDetail as Book;
+  const { title, cover_image, author, audios } = bookDetail as Book;
+  const { token } = useAuthStore();
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -32,7 +34,7 @@ const BookPlaylistScreen = () => {
         title: track.name,
         image: cover_image,
         author: author,
-        audioUrl: track.url
+        audioUrl: `${track.url}&token=${token}`
       }
     });
   };
@@ -59,7 +61,7 @@ const BookPlaylistScreen = () => {
       </View>
 
       <FlatList
-        data={audio_urls}
+        data={audios}
         renderItem={({ item }: any) => (
           <TouchableOpacity
             className="flex-row items-center px-6 py-4 border-b border-gray-200"
@@ -70,7 +72,7 @@ const BookPlaylistScreen = () => {
             </View>
             <View className="flex-1">
               <AppText weight="medium">{item.name}</AppText>
-              <AppText className="text-sm text-gray-500">{item.url.split('/').pop()}</AppText>
+              {/* <AppText className="text-sm text-gray-500">{item.url.split('/').pop()}</AppText> */}
             </View>
             <PlayCircle size={24} color="#FFB800" />
           </TouchableOpacity>

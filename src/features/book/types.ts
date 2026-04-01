@@ -17,7 +17,7 @@ export type Book = {
   price: number;   // 8000 (number)
   description: string;
   pdf_url: string; // Renamed from audioUrl
-  audio_urls: string;
+  audios: string;
   pages: number;
   language: string;
   download_count: number;
@@ -29,4 +29,5 @@ export type Book = {
   author: Author;
   book_status: number;
   sample_url: string;
+  pwd: string;
 };

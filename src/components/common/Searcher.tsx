@@ -42,7 +42,7 @@ const SearchComponent = ({
 
     return (
         <View className="w-full">
-            <View className="flex-row items-center rounded-xl px-3 border border-black/20 bg-black/10">
+            <View className="flex-row items-center rounded-xl px-3 bg-black/10">
                 <Search size={20} color="#6B7280" className="mr-3" />
 
                 <TextInput

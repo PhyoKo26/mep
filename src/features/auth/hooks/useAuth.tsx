@@ -33,8 +33,9 @@ export const useAuth = () => {
         setToken(respData.access_token, 'Bearer');
         setRefreshToken(respData.refresh_token, 'Bearer');
         setIsAuthenticated(true);
+      } else {
+        showToast(resp.success ? 'success' : 'error', resp.message || resp.error);
       }
-      showToast(resp.success ? 'success' : 'error', resp.message || resp.error);
     },
     onError: (err: any) => {
       const error = err.response?.data || err;

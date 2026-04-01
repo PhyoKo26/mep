@@ -1,12 +1,21 @@
-import { View, StatusBar, Image, TouchableOpacity, Dimensions, FlatList } from 'react-native';
+import {
+  View,
+  StatusBar,
+  Image,
+  TouchableOpacity,
+  Dimensions,
+  ScrollView,
+} from 'react-native';
 import React, { memo, useRef, useState, useEffect } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from 'components';
 import { ChevronLeft } from 'lucide-react-native';
 import { useAppNavigate } from 'hooks';
 
-const { width: WIDTH, height: HEIGHT } = Dimensions.get('window');
+
+const { width: WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = WIDTH - 43; // Fixed card width for proper snapping
+
 
 type BannerItem = {
   id: number;
@@ -19,49 +28,52 @@ type BannerItem = {
   sort_order: number;
 };
 
+
 type HomeBannerProps = {
   items: BannerItem[];
 };
 
+
 const HomeBanner = ({ items }: HomeBannerProps) => {
   const insets = useSafeAreaInsets();
   const { appNavigation } = useAppNavigate();
-  const flatListRef = useRef<FlatList>(null);
+  // ScrollView ref instead of FlatList
+  const scrollViewRef = useRef<ScrollView>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const autoScrollInterval = useRef<number | null>(null);
   const isUserScrolling = useRef(false);
 
+
   // Auto-scroll interval (3 seconds per slide)
   useEffect(() => {
-    if (items?.length > 1) {
-      autoScrollInterval.current = setInterval(() => {
-        if (!isUserScrolling.current) {
-          const nextIndex = (currentIndex + 1) % items?.length;
-          setCurrentIndex(nextIndex);
-          flatListRef.current?.scrollToIndex({
-            index: nextIndex,
-            animated: true,
-            viewPosition: 0.5,
-          });
-        }
-      }, 3000);
-    }
+    if (items?.length <= 1) return;
+
+    autoScrollInterval.current = setInterval(() => {
+      if (!isUserScrolling.current && items.length > 1) {
+        const nextIndex = (currentIndex + 1) % items.length;
+        setCurrentIndex(nextIndex);
+        scrollViewRef.current?.scrollTo({
+          x: CARD_WIDTH * nextIndex,
+          animated: true,
+        });
+      }
+    }, 3000);
 
     return () => {
-      if (autoScrollInterval.current) {
-        clearInterval(autoScrollInterval.current);
-      }
+      if (autoScrollInterval.current) clearInterval(autoScrollInterval.current);
     };
   }, [currentIndex, items?.length]);
 
-  const handleViewableItemsChanged = ({ viewableItems }: { viewableItems: any[] }) => {
-    if (viewableItems[0]) {
-      const newIndex = viewableItems[0].index || 0;
-      if (newIndex !== currentIndex) {
-        setCurrentIndex(newIndex);
-      }
+
+  const handleViewableItemsChanged = ({ nativeEvent }: any) => {
+    const offsetX = nativeEvent.contentOffset.x;
+    const index = Math.round(offsetX / CARD_WIDTH);
+
+    if (index !== currentIndex) {
+      setCurrentIndex(index);
     }
   };
+
 
   const handleScrollBeginDrag = () => {
     isUserScrolling.current = true;
@@ -70,49 +82,45 @@ const HomeBanner = ({ items }: HomeBannerProps) => {
     }
   };
 
+
   const handleScrollEndDrag = () => {
-    // Restart auto-scroll after user stops scrolling (with delay)
+    // Restart auto-scroll after user stops scrolling
     setTimeout(() => {
       isUserScrolling.current = false;
     }, 2000);
   };
 
-  const viewabilityConfig = {
-    itemVisiblePercentThreshold: 50,
-    minimumViewTime: 300,
-  };
 
-  const renderItem = ({ item }: { item: BannerItem }) => {
+  const renderItem = ({ item, index }: { item: BannerItem; index: number }) => {
     return (
-      <View style={{ width: CARD_WIDTH }}>
-        <TouchableOpacity
-          activeOpacity={0.9}
-          className="flex-1"
-          style={{ flex: 1 }} // Ensure touchable fills the container
-          onPress={() => {
-            console.log('Tapped:', item.image);
-            if (item.link_type === 'book') {
-              appNavigation.navigate('BookStack', {
-                screen: 'BookDetailScreen',
-                params: { id: item.link_id }
-              });
-            }
+      <TouchableOpacity
+        key={item.id.toString()}
+        activeOpacity={0.9}
+        className="flex-1"
+        style={{ flex: 1, width: CARD_WIDTH }}
+        onPress={() => {
+          console.log('Tapped:', item.image);
+          if (item.link_type === 'book') {
+            appNavigation.navigate('BookStack', {
+              screen: 'BookDetailScreen',
+              params: { id: item.link_id },
+            });
+          }
+        }}
+      >
+        <Image
+          source={{ uri: item.image }}
+          style={{
+            width: '100%',
+            aspectRatio: 16 / 9.95, // 16:9 banner ratio
+            borderRadius: 10,
           }}
-        >
-          <Image
-            source={{ uri: item.image }}
-            style={{
-              width: '100%',
-              aspectRatio: 16 / 9.95, // Adjust ratio as needed (16:9 banner ratio)
-              borderRadius: 10,
-              // backgroundColor: '#f2f2f2', // Fallback background
-            }}
-            resizeMode="contain"
-          />
-        </TouchableOpacity>
-      </View>
+          resizeMode="contain"
+        />
+      </TouchableOpacity>
     );
   };
+
 
   const renderIndicator = () => (
     <View className="flex-row justify-center items-center mt-4 px-6">
@@ -121,49 +129,72 @@ const HomeBanner = ({ items }: HomeBannerProps) => {
           key={index}
           onPress={() => {
             setCurrentIndex(index);
-            flatListRef.current?.scrollToIndex({
-              index,
+            scrollViewRef.current?.scrollTo({
+              x: CARD_WIDTH * index,
               animated: true,
             });
           }}
-          className={`w-2 h-2 mx-1 rounded-full ${index === currentIndex ? 'bg-primary' : 'bg-black/40'
-            }`}
+          className={`w-2 h-2 mx-1 rounded-full ${index === currentIndex ? 'bg-primary' : 'bg-black/40'}`}
         />
       ))}
     </View>
   );
 
-  if (!items || items?.length === 0) {
+
+  if (!items || items.length === 0) {
     return null;
   }
 
+
   return (
     <View className="flex items-center">
-      <FlatList
-        ref={flatListRef}
-        data={items}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
+      <ScrollView
+        ref={scrollViewRef}
         horizontal
         showsHorizontalScrollIndicator={false}
         snapToInterval={CARD_WIDTH}
         snapToAlignment="start"
         decelerationRate="fast"
-        viewabilityConfig={viewabilityConfig}
-        onViewableItemsChanged={handleViewableItemsChanged}
-        onScrollBeginDrag={handleScrollBeginDrag}
-        onMomentumScrollEnd={handleScrollEndDrag}
-        getItemLayout={(_, index) => ({
-          length: CARD_WIDTH,
-          offset: CARD_WIDTH * index,
-          index,
-        })}
         // contentContainerStyle={{ paddingHorizontal: 24 }}
         pagingEnabled={false}
-      />
+        onScroll={handleViewableItemsChanged}
+        onScrollBeginDrag={handleScrollBeginDrag}
+        onMomentumScrollEnd={handleScrollEndDrag}
+        scrollEventThrottle={16}
+      >
+        {items.map((item, index) => (
+          <TouchableOpacity
+            key={item.id.toString()}
+            activeOpacity={0.9}
+            className="flex-1"
+            style={{ flex: 1, width: CARD_WIDTH }}
+            onPress={() => {
+              console.log('Tapped:', item.image);
+              if (item.link_type === 'book') {
+                appNavigation.navigate('BookStack', {
+                  screen: 'BookDetailScreen',
+                  params: { id: item.link_id },
+                });
+              }
+            }}
+          >
+            <Image
+              source={{ uri: item.image }}
+              style={{
+                width: '100%',
+                aspectRatio: 16 / 9.95,
+                borderRadius: 10,
+              }}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
       {renderIndicator()}
     </View>
   );
 };
+
 
 export default memo(HomeBanner);

@@ -10,6 +10,8 @@ import RNFS from 'react-native-fs';
 import Toast from 'react-native-toast-message';
 import { CameraRoll } from '@react-native-camera-roll/camera-roll';
 import { captureRef } from 'react-native-view-shot';
+import CryptoJS from 'crypto-js';
+import { ENCRYPTION_KEY } from '@env';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -205,6 +207,8 @@ export const saveCaptureRefToDevice = async (viewRef: any) => {
 };
 
 export const usePdfManager = () => {
+  const { token } = useAuthStore.getState();
+
   const getPdfDir = (): string => {
     return Platform.select({
       ios: `${RNFS.DocumentDirectoryPath}/pdfs/`,
@@ -248,9 +252,10 @@ export const usePdfManager = () => {
     onProgress?: (progress: number) => void  // ✅ Progress callback
   ): Promise<string> => {
     try {
-      console.log('[PDF] Raw URL:', pdfUrl);
+      console.log(bookId, '[PDF] Raw URL:', `${pdfUrl}&token=${token}`);
 
-      const encodedUrl = encodeURI(pdfUrl);
+      // const encodedUrl = encodeURI(`${pdfUrl}&token=${token}`);
+      const encodedUrl = `${pdfUrl}&token=${token}`;
       console.log('[PDF] Encoded URL:', encodedUrl);
 
       await ensurePdfDir();
@@ -290,4 +295,26 @@ export const usePdfManager = () => {
   };
 
   return { isPdfDownloaded, downloadPdf, getPdfPath };
+};
+
+export const decryptPdfPassword = (encryptedText: string): string | null => {
+  try {
+    if (!encryptedText) return null;
+
+    const [ivHex, encHex] = encryptedText.split(':');
+    const key = CryptoJS.enc.Utf8.parse(ENCRYPTION_KEY.padEnd(32, '0').slice(0, 32));
+    const iv = CryptoJS.enc.Hex.parse(ivHex);
+    const encrypted = CryptoJS.enc.Hex.parse(encHex);
+
+    // ✅ CipherParams wrapper (matches encrypt output)
+    const ciphertextParams: any = { ciphertext: encrypted };
+    const decrypted = CryptoJS.AES.decrypt(ciphertextParams, key, {
+      iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7
+    });
+
+    return decrypted.toString(CryptoJS.enc.Utf8) || null;
+  } catch (e) {
+    console.error('Decrypt error:', e);
+    return null;
+  }
 };
