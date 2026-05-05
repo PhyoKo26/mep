@@ -145,7 +145,7 @@ const BookBuyScreen = () => {
               />
               <View className="flex-1">
                 <AppText weight='medium' className="text-sm mb-1">
-                  Name - {selectedPaymentMethod === 'KBZPay' ? 'Sai Thang Vunga' : 'MEP Wave Money'}
+                  Name - {selectedPaymentMethod === 'KBZPay' ? 'Sal Thang Vunga' : 'MEP Wave Money'}
                 </AppText>
                 {/* <AppText className="text-sm">
                   Phone No - {selectedPaymentMethod === 'KBZPay' ? '09 960 620 488' : '09 960 620 488'}
