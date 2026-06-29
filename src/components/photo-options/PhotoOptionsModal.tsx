@@ -70,12 +70,12 @@ export const PhotoOptionsModal: React.FC<Props> = ({ visible, onClose, onImageSe
 
     const handlePick = async (type: 'camera' | 'library') => {
         if (type === 'camera') {
-            const hasCamPerm = await askCameraPermission();
-            if (!hasCamPerm) return;
+            // const hasCamPerm = await askCameraPermission();
+            // if (!hasCamPerm) return;
             launchCamera(options as any, handleResponse);
         } else {
-            const hasStoragePerm = await askStoragePermission();
-            if (!hasStoragePerm) return;
+            // const hasStoragePerm = await askStoragePermission();
+            // if (!hasStoragePerm) return;
             launchImageLibrary(options as any, handleResponse);
         }
     };
